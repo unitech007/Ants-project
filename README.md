@@ -1,5 +1,5 @@
-# Handyman
-### What is Handyman ?
+# Ants
+### What is Ants ?
 A platform for all the small-scale vendors, housewives and any other skilled people who are not getting enough time to showcase their skills due to many different reasons like less market knowledge, less awareness of how to target the customers, and because of large-scale companies who have acquired the market. Our platform will help such skilled people to expand their businesses under their brand name and customers can afford their services at a reasonable cost. 
 
 Tools: HTML 5, CSS 3, Bootstrap 4, JavaScript, Express.js, Node.js, MongoDB, Passport.js, Android, Java
@@ -9,17 +9,17 @@ Tools: HTML 5, CSS 3, Bootstrap 4, JavaScript, Express.js, Node.js, MongoDB, Pas
 1. Download the project. (Zip or Clone). Unzip it.
 2. Make an account on CLOUDINARY (https://cloudinary.com/)
    Get the API Key and API Secret
-   In .env file which is at the same level of app.js file, make updates as below for handyman-web and handyman-admin
+   In .env file which is at the same level of app.js file, make updates as below for ants-web and ants-admin
    CLOUDINARY_API_KEY=YOUR_CLOUDINARY_API_KEY
    CLOUDINARY_API_SECRET=YOUR_CLOUDINARY_API_SECRET
 3. Inorder to make Forgot Password module work, you need to create a new email id or use any existing.
-   Then for handyman-admin and handyman-web, under
+   Then for ants-admin and ants-web, under
    routes > admin.js
    routes > customer.js
    routes > vendor.js
    Change all "YOUR_EMAIL_ID" to the email id you created/ had in advance [existing].
 4. You need to have Node, MongoDB installed to run the application
-5. After that, install all the necessary dependencies which are listed below for handyman-web and handyman-admin.
+5. After that, install all the necessary dependencies which are listed below for ants-web and ants-admin.
    Check out NPM BASIC COMMANDS
 </pre>
 
@@ -27,18 +27,18 @@ Tools: HTML 5, CSS 3, Bootstrap 4, JavaScript, Express.js, Node.js, MongoDB, Pas
 http://dreamerslab.com/blog/en/npm-basic-commands/ <br/>
 https://codeburst.io/getting-started-with-node-js-a-beginners-guide-b03e25bca71b
 
-## handyman-admin > package.json
+## ants-admin > package.json
 <pre>
 {
-  "name": "handyman-admin",
+  "name": "ants-admin",
   "version": "1.0.0",
-  "description": "Handyman Admin Panel",
+  "description": "Ants Admin Panel",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Dhrumil Amish Shah",
+  "author": "Universal infotech",
   "license": "ISC",
   "dependencies": {
     "async": "^2.6.1",
@@ -62,18 +62,18 @@ https://codeburst.io/getting-started-with-node-js-a-beginners-guide-b03e25bca71b
 </pre>
 
 
-## handyman-web > package.json
+## ants-web > package.json
 <pre>
 {
-  "name": "handyman-web",
+  "name": "ants-web",
   "version": "1.0.0",
-  "description": "Handyman Web Application",
+  "description": "Ants Web Application",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Dhrumil Amish Shah",
+  "author": "Universal infotech",
   "license": "ISC",
   "dependencies": {
     "async": "^2.6.1",
@@ -117,7 +117,7 @@ Then there is a **models** folder, in which we have a different models.<br/>
 A **views** folder, which have our views with an extension of ejs. Be noted that ejs is a templating engine which means that it has the ability to generate the pages by filling in the templating that we create.<br/>
 A **middleware** folder, which have our middlewares for authentication and to check comment ownership.<br/>
 
-## Folder: handyman-web
+## Folder: ants-web
 This website is for customers and vendors. They both can register through registration path
 I made this to run on port 3000. You can change the port number if you want to.
 It can be changed in ".env" file.
@@ -150,7 +150,7 @@ Some operations which can be performed are...
 
 
 
-## Folder:- handyman-admin
+## Folder:- ants-admin
 This website is for admins.
 I made this to run on port 3001.You can change the port number if you want to.
 It can be changed in ".env" file. 
@@ -165,15 +165,15 @@ Some operations which can be performed are...
 8. Login 
 9. Edit Admin Profile can be performed.
 
-## Folder:- handymanapp
+## Folder:- antsapp
 Since I have made the application fully responsive, it can work on any device size. 
 Android application which uses WebView component and some tweaks.
 You can use tools like ngrok (https://ngrok.com/)
 Just type one command for, secure URL to your localhost server through any NAT or firewall.
-Just use command [ngrok http 3000] and then use the URL which is generated and replace the "YOUR_HANDYMAN_URL" in MainActivity.java
+Just use command [ngrok http 3000] and then use the URL which is generated and replace the "YOUR_ANTS_URL" in MainActivity.java
 
-## Folder:- handyman-website-images
-Images of handyman website. Check out this folder to see different images of website.
+## Folder:- ants-website-images
+Images of ants website. Check out this folder to see different images of website.
 
-## Folder:- handyman-app-video
-Working video of handyman android application.
+## Folder:- ants-app-video
+Working video of ants android application.

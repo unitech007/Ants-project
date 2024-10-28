@@ -1,0 +1,60 @@
+<% include ../partials/header %>
+
+<meta name="description" content="Ants: Unified Booking - Book any subservice.">
+<link rel="stylesheet" href="/stylesheets/booking.css" />
+<title>Ants: Unified Booking</title>
+
+<% include ../partials/navbar %>
+
+<div class="container">
+    <header class="jumbotron">
+        <div class="container">
+            <!-- Display the passed service and subservice names -->
+            <h1>Booking - <%= serviceName %>- <%= subServiceName %></h1>
+            <p>Book professional services for <%= subServiceName %> at your convenience.</p>
+        </div>
+    </header>
+
+    <!-- Booking Form -->
+    <form id="booking-form" action="/booking" method="POST">
+        <!-- Date Input -->
+        <div class="form-group">
+            <label for="date">Enter date for service</label>
+            <input type="date" id="date" name="date" class="form-control" required>
+        </div>
+
+        <!-- Time Input -->
+        <div class="form-group">
+            <label for="time">Enter time for service</label>
+            <input type="time" id="time" name="time" class="form-control" required>
+        </div>
+
+        <!-- Vendor List Dropdown -->
+        <div class="form-group">
+            <label for="vendor">Select a vendor</label>
+            <div id="vendor-list">
+                <select id="vendor" name="vendor" class="form-control" required>
+                    <option value="" disabled selected>Select a vendor</option>
+                    <% if (vendor && vendor.length > 0) { %>
+                        <% vendor.forEach(function(vendor) { %>
+                            <option value="<%= vendor.name %>">
+                                <%= vendor.username %> - <%= vendor.experience %> - ₹<%= vendor.visitCharge %>
+                            </option>
+                        <% }); %>
+                    <% } else { %>
+                        <option value="" disabled>No vendors available</option>
+                    <% } %>
+                </select>
+            </div>
+        </div>
+
+        <!-- Hidden Fields for Service and Subservice -->
+        <input type="hidden" name="serviceName" value="<%= serviceName %>">
+        <input type="hidden" name="subServiceName" value="<%= subServiceName %>">
+
+        <!-- Book Now Button -->
+        <button type="submit" class="btn btn-primary">Book Now</button>
+    </form>
+</div>
+
+<% include ../partials/footer %>

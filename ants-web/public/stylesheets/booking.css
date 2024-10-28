@@ -1,0 +1,73 @@
+/* Ensure full-page scrolling */
+body, html {
+    height: 112%;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto; /* Allows vertical scrolling */
+}
+
+/* Styling for jumbotron section */
+.jumbotron {
+    margin-top: 16px;
+    color: #ffffff;
+    background: #3C88C2;
+    padding: 40px 20px;
+}
+
+.jumbotron h1 {
+    font-size: 2.5em;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 6px rgba(255, 255, 255, 0.4);
+    margin-bottom: 10px;
+}
+
+.jumbotron p {
+    font-size: 1.2em;
+}
+
+/* Button styling */
+.btn {
+    background-color: #3C88C2;
+    border-color: #3C88C2;
+    color: #ffffff;
+    padding: 10px 20px;
+}
+
+.btn:hover {
+    background-color: #3375A1;
+    border-color: #3375A1;
+}
+
+/* Styling for the form section */
+#booking-form {
+    margin-top: 20px;
+}
+
+#booking-form .form-group {
+    margin-bottom: 20px; /* Adjusted spacing for better clarity */
+}
+
+#booking-form label {
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: block;
+}
+
+#booking-form .form-control {
+    padding: 5px;
+    font-size: 1em;
+}
+
+/* Vendor dropdown specific styling */
+#vendor-list select {
+    padding: 10px;
+    font-size: 1em;
+    margin-top: 10px; /* Adds space between label and dropdown */
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+    .jumbotron h1 {
+        font-size: 2em;
+    }
+}
