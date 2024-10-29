@@ -390,7 +390,7 @@ router.get('/booking/salon_at_home', async (req, res) => {
 });  */
 
 //ROUTE TO SEE THE SPECIFIC VENDOR DEPENDING ON SERVICE, SUBSERVICE AND VENDOR ID
- /* router.get("/:service/:subservice/:id", middleware.isLoggedIn, function (req, res) {
+ router.get("/:service/:subservice/:id", middleware.isLoggedIn, function (req, res) {
   Vendor.findById(req.params.id).populate("comments").exec(function (err, foundVendor) {
     if (err) {
       req.flash("error", err.message);
@@ -410,6 +410,6 @@ router.get('/booking/salon_at_home', async (req, res) => {
       res.render("vendor/v_show", { vendor: foundVendor });
     }
   });
-});  */
+}); 
 
 module.exports = router;

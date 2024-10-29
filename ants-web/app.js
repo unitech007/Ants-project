@@ -120,6 +120,7 @@ passport.use("vendor", new LocalStrategy(
 // Middleware to make session data available to all views
 app.use(function (req, res, next) {
   res.locals.currentUser = req.user;
+  /* res.locals.currentUser = req.session.username; */
   res.locals.error = req.flash("error");
   res.locals.success = req.flash("success");
   next();
