@@ -17,6 +17,7 @@ var vendorRoutes = require("./routes/vendor");
 var commentRoutes = require("./routes/comment");
 var bookingRoutes = require("./routes/booking");
 var mybookingRoutes = require("./routes/mybooking");
+const enquiryRoutes = require('./routes/enquiry');
 var isCustomer = null;
  
 
@@ -131,6 +132,7 @@ app.use(indexRoutes);
 app.use(customerRoutes);
 app.use(vendorRoutes);
 app.use(commentRoutes);
+app.use('/enquiry', enquiryRoutes);
 app.use('/booking', bookingRoutes);
 app.use('/mybooking',mybookingRoutes);
 

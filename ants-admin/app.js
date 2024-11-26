@@ -13,7 +13,8 @@ var adminRoutes = require("./routes/admin");
 var customerRoutes = require("./routes/customer");
 var vendorRoutes = require("./routes/vendor");
 var commentRoutes = require("./routes/comment");
-var beautyRoutes = require("./routes/beauty");
+const enquiryRoutes = require("./routes/enquiry");
+
 
 mongoose.connect("mongodb://localhost:27017/ants", { useNewUrlParser: true });
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -52,7 +53,8 @@ app.use(adminRoutes);
 app.use(customerRoutes);
 app.use(vendorRoutes);
 app.use(commentRoutes);
-/* app.use("/beauty", beautyRoutes); */
+app.use('/enquiry', enquiryRoutes);
+
 
 //Route for logout
 app.get("/logout", function (req, res) {

@@ -1,29 +1,54 @@
  <% include ../partials/header %>
 
-<meta name="description" content="Ants: Vendors List: List of all the vendors">
-<title>Ants: Awesome Vendors</title>
+<meta name="description" content="Ants: Vendors List: Pending and Approved Vendors">
+<title>Ants: Vendors Management</title>
 <link rel="stylesheet" href="/stylesheets/v_list.css" />
 <link rel="stylesheet" href="/stylesheets/image_style.css" />
 
 <% include ../partials/navbar %>
 
-<div class="text-center container vendors-list-container">
+<div class="container vendors-list-container">
+
+   <!-- Pending Vendors Section -->
+<h3 class="mt-4 mb-3 text-center">Pending Approval Vendors</h3>
+<% if (pendingVendors && pendingVendors.length > 0) { %>
     <div class="row">
-        <% foundVendors.forEach(function(vendor){ %>
-        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12">
-            <div class="vendor-image-div">
-                <div class="vendor-image"><img src="<%= vendor.image %>" alt=""></div>
+        <% pendingVendors.forEach(function(vendor) { %>
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
+                <div class="vendor-image-div">
+                    <div class="vendor-image"><img src="<%= vendor.image %>" alt=""></div>
+                </div>
+                <h2 class="vendor-fname"><%= vendor.fname %></h2>
+                <h5 class="vendor-lname"><%= vendor.lname %></h5>
+                <p><a href="/<%= vendor.service %>/<%= vendor.subservice %>/<%= vendor._id %>" class="btn btn-primary">More Info</a></p>
             </div>
-            <h2 class="vendor-fname"><%= vendor.fname %></h2>
-            <h5 class="vendor-lname"><%= vendor.lname %></h5>
-            <span class="vendor-rating">4.8 / 5</span>
-            <p><a href="/<%= vendor.service %>/<%= vendor.subservice %>/<%= vendor._id %>" class="btn btn-primary">More
-                    Info</a></p>
-        </div>
         <% }); %>
     </div>
+<% } else { %>
+    <p class="text-center">No vendors pending approval.</p>
+<% } %>
+
+<!-- Approved Vendors Section -->
+<h3 class="mt-4 mb-3 text-center">Approved Vendors</h3>
+<% if (approvedVendors && approvedVendors.length > 0) { %>
+    <div class="row">
+        <% approvedVendors.forEach(function(vendor) { %>
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-4">
+                <div class="vendor-image-div">
+                    <div class="vendor-image"><img src="<%= vendor.image %>" alt=""></div>
+                </div>
+                <h2 class="vendor-fname"><%= vendor.fname %></h2>
+                <h5 class="vendor-lname"><%= vendor.lname %></h5>
+                <p><a href="/<%= vendor.service %>/<%= vendor.subservice %>/<%= vendor._id %>" class="btn btn-primary">More Info</a></p>
+            </div>
+        <% }); %>
+    </div>
+<% } else { %>
+    <p class="text-center">No approved vendors found.</p>
+<% } %>
+
+
 </div>
 
-<% include ../partials/footer %> 
-
+<% include ../partials/footer %>
 

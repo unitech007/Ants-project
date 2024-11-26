@@ -1,6 +1,6 @@
 /* padding-bottom to arrange the footer properly */
 
-.vendors-list-container {
+/* .vendors-list-container {
 	margin-top: 32px;
 	padding-bottom: 120px;
 }
@@ -21,4 +21,39 @@ h5 {
 
 .btn {
 	margin-top: 8px;
+} */
+.vendors-list-container {
+	margin-top: 32px;
+	padding-bottom: 120px;
+}
+.vendor-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.vendor-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+.vendor-image-div {
+    overflow: hidden;
+    border-radius: 10px 10px 0 0;
+}
+.vendor-image {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+.vendor-fname {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+.vendor-lname {
+    font-size: 16px;
+    color: #666;
+}
+.vendor-rating {
+    font-size: 14px;
+    margin-top: 5px;
 }
