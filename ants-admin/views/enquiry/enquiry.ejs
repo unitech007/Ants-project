@@ -1,0 +1,36 @@
+<% include ../partials/header %>
+
+    <title>Enquiries</title>
+    <link rel="stylesheet" href="/stylesheets/enquiry.css" />
+
+<% include ../partials/navbar %>
+<div class="enquiries-list-container">
+    <h1>All Enquiries</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile</th>
+                <th>Subject</th>
+                <th>Message</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% enquiries.forEach((enquiry, index) => { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= enquiry.name %></td>
+                    <td><%= enquiry.email %></td>
+                    <td><%= enquiry.mobile %></td>
+                    <td><%= enquiry.subject %></td>
+                    <td><%= enquiry.message %></td>
+                    <td><%= enquiry.createdAt.toDateString() %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+<% include ../partials/footer %>

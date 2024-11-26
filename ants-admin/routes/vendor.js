@@ -126,67 +126,69 @@ router.delete("/vendor/:id", middleware.isLoggedIn, function (req, res) {
   });
 });
 
-//ROUTE TO SEE ALL THE VENDORS WHO ARE NOT APPROVED
-router.get("/vendor/vendor_approve_request", middleware.isLoggedIn, function (req, res) {
-  Vendor.find({ isApproved: false }, function (err, foundVendors) {
-    if (err) {
-      req.flash("error", err.message);
-      res.redirect("back");
-    } else {
-      res.render("vendor/v_list", { foundVendors: foundVendors });
-    }
-  });
-});
 
-//ROUTE TO APPROVE THE VENDOR
-router.put("/vendor/:id/approve", middleware.isLoggedIn, function (req, res) {
-  Vendor.findByIdAndUpdate(req.params.id, { isApproved: true }, function (err, updatedVendor) {
-    if (err) {
-      req.flash("error", "Oops!! Something went wrong. Please try again.")
-      res.redirect("back");
-    } else {
-      req.flash("success", "Vendor Approved.")
-      res.redirect("/" + updatedVendor.service + "/" + updatedVendor.subservice + "/" + updatedVendor._id);
-    }
-  });
-});
 
-// Route to render salon_at_home page and pass approved vendor suggestions
-router.get('/salon_at_home', async (req, res) => {
+// ROUTE TO SEE ALL THE VENDORS WHO ARE NOT APPROVED
+router.get("/vendor/vendor_approve_request", middleware.isLoggedIn, async (req, res) => {
   try {
-      // Fetch only approved vendors from the database
-      const vendors = await Vendor.find({ isApproved: true });
+    // Fetch pending approval vendors
+    const pendingVendors = await Vendor.find({ isApproved: false });
 
-      // Render the EJS page with vendor data
-      res.render('salon_at_home', { vendors });
-  } catch (error) {
-      console.error('Error fetching vendors:', error);
-      res.status(500).send('Internal Server Error');
+    // Fetch approved vendors
+    const approvedVendors = await Vendor.find({ isApproved: true });
+
+    // Pass both to the template
+    res.render("vendor/v_list", { pendingVendors, approvedVendors });
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Unable to fetch vendors.");
+    res.redirect("back");
   }
 });
 
-//ROUTE TO SEE ALL THE VENDORS LIST DEPENDING ON SERVICE AND SUBSERVICE
-router.get("/:service/:subservice", function (req, res) {
-  Vendor.find({ isApproved: true, service: req.params.service, subservice: req.params.subservice }, function (err, foundVendors) {
+
+
+//ROUTE TO APPROVE THE VENDOR
+router.put("/vendor/:id/approve", middleware.isLoggedIn, function (req, res) {
+  Vendor.findByIdAndUpdate(req.params.id, { isApproved: true }, function (err) {
     if (err) {
-      req.flash("error", err.message);
+      req.flash("error", "Oops!! Something went wrong. Please try again.");
       res.redirect("back");
     } else {
-      res.render("vendor/v_list", { foundVendors: foundVendors });
+      req.flash("success", "Vendor Approved.");
+      // Redirect to the approved vendors list
+      res.redirect("back");
     }
   });
 });
 
-//ROUTE TO SEE THE SPECIFIC VENDOR DEPENDING ON SERVICE, SUBSERVICE AND VENDOR ID
-router.get("/:service/:subservice/:id", middleware.isLoggedIn, function (req, res) {
-  Vendor.findById(req.params.id).populate("comments").exec(function (err, foundVendor) {
-    if (err) {
-      req.flash("error", err.message);
+// ROUTE TO SEE PENDING AND APPROVED VENDORS
+router.get("/vendors", middleware.isLoggedIn, async (req, res) => {
+  try {
+      const pendingVendors = await Vendor.find({ isApproved: false }); // Pending approval vendors
+      const approvedVendors = await Vendor.find({ isApproved: true }); // Approved vendors
+
+      // Pass both variables to the EJS template
+      res.render("vendor/v_list", { pendingVendors, approvedVendors });
+  } catch (err) {
+      console.error(err);
+      req.flash("error", "Unable to fetch vendors.");
       res.redirect("back");
-    } else {
-      res.render("vendor/v_show", { vendor: foundVendor });
-    }
-  });
+  }
 });
+
+
+
+//ROUTE TO SEE THE SPECIFIC VENDOR DEPENDING ON SERVICE, SUBSERVICE AND VENDOR ID
+ router.get("/:service/:subservice/:id", middleware.isLoggedIn, function (req, res) {
+   Vendor.findById(req.params.id).populate("comments").exec(function (err, foundVendor) {
+     if (err) {
+       req.flash("error", err.message);
+       res.redirect("back");
+     } else {
+       res.render("vendor/v_show", { vendor: foundVendor });
+     }
+   });
+ });
 
 module.exports = router;
