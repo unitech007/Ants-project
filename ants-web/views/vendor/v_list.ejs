@@ -1,7 +1,7 @@
    <% include ../partials/header %>
 
-<meta name="description" content="Ants: Vendors List: List of all the vendors">
-<title>Ants: Awesome Vendors</title>
+<meta name="description" content="<%= __('common.vendors_list_meta') %>">
+<title><%= __('common.vendors_list_title') %></title>
 <link rel="stylesheet" href="/stylesheets/v_list.css" />
 <link rel="stylesheet" href="/stylesheets/image_style.css" />
 
@@ -16,8 +16,8 @@
             </div>
             <h2 class="vendor-fname"><%= vendor.fname %></h2>
             <h5 class="vendor-lname"><%= vendor.lname %></h5>
-            <span class="vendor-rating">4.8 / 5</span>
-            <p><a href="<%= vendor.subservice %>/<%= vendor._id %>" class="btn btn-info">More Info</a></p>
+            <span class="vendor-rating"><%= __('common.vendor_rating') %></span>
+            <p><a href="<%= vendor.subservice %>/<%= vendor._id %>" class="btn btn-info"><%= __('common.more_info_button') %></a></p>
         </div>
         <% }); %>
     </div>

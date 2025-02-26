@@ -1,0 +1,88 @@
+<% include ../partials/header %>
+
+<meta name="description" content="Ants: Admin Booking Details">
+<link rel="stylesheet" href="/stylesheets/bookingdetails.css" />
+<title><%= __('common.admin_booking_title') %></title>
+
+<% include ../partials/navbar %>
+
+<div class="container">
+    <header class="jumbotron">
+        <h1><%= __('common.admin_booking_heading') %></h1>
+        <p><%= __('common.admin_booking_paragraph') %></p>
+    </header>
+
+    <% if (bookings.length > 0) { %>
+        <ul class="list-group">
+            <% bookings.forEach(function(booking) { %>
+                <li class="list-group-item">
+                    <strong><%= __('common.admin_booking_service') %></strong> <%= booking.serviceName %> <br />
+                    <strong><%= __('common.admin_booking_subservice') %></strong> <%= booking.subServiceName %> <br />
+                    <strong><%= __('common.admin_booking_worktype') %></strong> <%= booking.worktype %> <br />
+                    <strong><%= __('common.admin_booking_worktypeprices') %></strong> <%= booking.worktypePrices %> <br />
+                    <strong><%= __('common.admin_booking_date') %></strong> <%= booking.date %> <br />
+                    <strong><%= __('common.admin_booking_time') %></strong> <%= booking.time %> <br />
+                    <strong><%= __('common.admin_booking_vendor') %></strong> <%= booking.vendor && booking.vendor.username ? booking.vendor.username : 'N/A' %> <br />
+                    <strong><%= __('common.admin_booking_experience') %></strong> <%= booking.vendor && booking.vendor.experience ? booking.vendor.experience : 'N/A' %> <br />
+                    <strong><%= __('common.admin_booking_visitcharge') %></strong> ₹<%= booking.vendor && booking.vendor.visitCharge ? booking.vendor.visitCharge : 'N/A' %> <br />
+                    <strong><%= __('common.admin_booking_totalprice') %></strong> <%= booking.totalPrice %> <br />
+                    <strong><%= __('common.admin_booking_user') %></strong> <%= booking.user && booking.user.username ? booking.user.username : 'N/A' %> <br />
+                    <strong><%= __('common.admin_booking_userid') %></strong> <%= booking.user && booking.user._id ? booking.user._id : 'N/A' %> <br />
+                    <strong>Status:</strong> 
+                    <% if (booking.stage === 'active') { %>
+                        <% if (booking.status === 'Pending') { %>
+                            <span class="badge badge-warning">Active - Pending</span>
+                        <% } else { %>
+                            <span class="badge badge-success">Active - Completed</span>
+                        <% } %>
+                    <% } else { %>
+                        <span class="badge badge-danger">Cancelled</span>
+                    <% } %>
+                    <div class="booking-actions">
+                        <!-- Edit Button -->
+                        <a href="/editbooking/<%= booking._id %>" class="btn btn-danger edit-booking">
+                            <%= __('common.edit') %>
+                        </a>
+
+                        <!-- Cancel Button -->
+                        <button class="btn btn-danger cancel-booking" data-id="<%= booking._id %>">
+                            <%= __('common.cancel') %>
+                        </button>
+                    </div>
+                </li>
+            <% }) %>
+        </ul>
+    <% } else { %>
+        <p><%= __('common.admin_booking_nobooking') %></p>
+    <% } %>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".cancel-booking").forEach(button => {
+            button.addEventListener("click", function () {
+                const bookingId = this.getAttribute("data-id");
+
+                if (confirm("Sure you want to cancel the service? Once cancelled, it cannot be redeemed.")) {
+                    fetch(`/mybooking/cancel-booking/${bookingId}`, { 
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Booking cancelled successfully.");
+                            window.location.reload(); // Refresh page to hide cancelled bookings
+                        } else {
+                            alert("Error: " + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error cancelling booking:", error);
+                        alert("Error cancelling booking: " + error.message);
+                    });
+                }
+            });
+        });
+    });
+</script>
+<% include ../partials/footer %>

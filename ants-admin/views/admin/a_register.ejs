@@ -1,43 +1,43 @@
 <% include ../partials/header %>
 
-<title>Ants: Admin Registeration</title>
+<title><%= __('common.admin_registration_title') %> </title>
 <link rel="stylesheet" href="/stylesheets/form.css" />
 
 <% include ../partials/navbar %>
 <div class="container form-content">
-    <h1 class="text-center">Admin Register</h1>
+    <h1 class="text-center"><%= __('common.admin_registration_heading') %></h1>
     <div class="form-container">
         <form action="/admin/register" method="POST">
             <div class="form-group">
-                <input class="form-control" type="text" maxlength="30" name="fname" placeholder="First Name" required
+                <input class="form-control" type="text" maxlength="30" name="fname" placeholder="<%= __('common.admin_registration_firstname') %>" required
                     autofocus>
             </div>
             <div class="form-group">
-                <input class="form-control" type="text" maxlength="30" name="lname" placeholder="Last Name" required>
+                <input class="form-control" type="text" maxlength="30" name="lname" placeholder="<%= __('common.admin_registration_lastname') %>" required>
             </div>
             <div class="form-group">
-                <input class="form-control" type="text" maxlength="35" name="username" placeholder="Username" required>
+                <input class="form-control" type="text" maxlength="35" name="username" placeholder="<%= __('common.admin_registration_username') %>" required>
             </div>
             <div class="form-group">
-                <input class="form-control" type="email" maxlength="254" name="email" placeholder="Email" required>
+                <input class="form-control" type="email" maxlength="254" name="email" placeholder="<%= __('common.admin_registration_email') %>" required>
             </div>
             <div class="form-group">
-                <input class="form-control" type="email" maxlength="254" name="confirmemail" placeholder="Confirm Email"
+                <input class="form-control" type="email" maxlength="254" name="confirmemail" placeholder="<%= __('common.admin_registration_confirmemail') %>"
                     required>
             </div>
             <div class="form-group">
                 <input class="form-control" type="password" minlength="8" maxlength="30" name="password"
-                    placeholder="Password" required>
+                    placeholder="<%= __('common.admin_registration_password') %>" required>
             </div>
             <div class="form-group">
                 <input class="form-control" type="password" minlength="8" maxlength="30" name="confirmpassword"
-                    placeholder="Confirm Password" required>
+                    placeholder="<%= __('common.admin_registration_confirmpassword') %>" required>
             </div>
             <div class="form-group">
-                <button class="btn btn-lg btn-primary btn-block">Register</button>
+                <button class="btn btn-lg btn-primary btn-block"><%= __('common.admin_registration_button') %></button>
             </div>
         </form>
-        <p>Already have an account? <a href="/admin/login">Login!</a>
+        <p><%= __('common.admin_registration_already_have_account') %> <a href="/admin/login"><%= __('common.admin_registration_login') %></a>
     </div>
 </div>
 

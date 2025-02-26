@@ -5,14 +5,17 @@ router.use(expressValidator());
 var passport = require("passport");
 var Vendor = require("../models/vendor");
 var Comment = require("../models/comment");
+const Booking = require("../models/booking");
+var Service = require("../models/service");
+var Subservice = require("../models/subservice");
+const Worktype = require("../models/worktype");
+const EmailTemplate = require('../models/emailtemplate');
 var middleware = require("../middleware");
 var async = require("async");
 var nodemailer = require("nodemailer");
 var crypto = require("crypto");
 var multer = require("multer");
-/* const express = require('express');
-const router = express.Router();
-const Vendor = require('../models/vendor'); */
+const emailcontrollers = require('../controllers/emailcontrollers');
 
 //CLOUDINARY RELATED CODE
 var storage = multer.diskStorage({
@@ -40,43 +43,91 @@ router.get("/vendor/login", function (req, res) {
   res.render("vendor/v_login");
 });
 
-// ROUTE FOR THE VENDOR LOGIN
-router.post("/vendor/login", passport.authenticate("vendor",
-  {
-    successRedirect: "/services",
-    failureRedirect: "/vendor/login",
-    failureFlash: "Incorrect username or Password",
-    successFlash: "Welcome to Ants!"
-  }), function (req, res) {
-  });
+// ROUTE FOR VENDOR LOGIN
+router.post("/vendor/login", function (req, res, next) {
+  // Trim spaces from the username and password
+  req.body.username = req.body.username.trim();
+  req.body.password = req.body.password.trim();
 
-// router.post("/vendor/login", function (req, res, next) {
-//   passport.authenticate("vendor", function (err, vendor, info) {
-//     if (err) {
-//       req.flash("error", err.message);
-//       return res.redirect("/vendor/login");
-//     }
-//     if (!vendor) {
-//       req.flash("error", "Incorrect username or Password");
-//       return res.redirect("/vendor/login");
-//     }
-//     if(!vendor.isApproved){
-//       req.flash("error", "Your request is not approved! Please wait for Approval. Our Ants team will contact you soon.");
-//       return res.redirect("/vendor/login");
-//     }
-//     req.logIn(vendor, function (err) {
-//       if (err) {
-//         req.flash("error", err.message);
-//         return res.redirect("/vendor/login");
-//       }
-//       return res.redirect("/services");
-//     });
-//   })(req, res, next);
-// });
-//ROUTE FOR THE VENDOR REGISTERATION PAGE
-router.get("/vendor/register", function (req, res) {
-  res.render("vendor/v_register");
+  // Proceed with Passport authentication
+  passport.authenticate("vendor", {
+      successRedirect: "/myservices",
+      failureRedirect: "/vendor/login",
+      failureFlash: "Incorrect username or Password",
+      successFlash: "Welcome to Ants!"
+  })(req, res, next);
+}, function (req, res) {
+  // You can add additional actions here if needed after login
 });
+
+
+//ROUTE FOR CHECK VENDOR APPROVAL LOGIN
+ router.post("/vendor/login", function (req, res, next) {
+   passport.authenticate("vendor", function (err, vendor, info) {
+     if (err) {
+       req.flash("error", err.message);
+       return res.redirect("/vendor/login");
+     }
+     if (!vendor) {
+       req.flash("error", "Incorrect username or Password");
+       return res.redirect("/vendor/login");
+     }
+     console.log("Vendor approval status: ", vendor.isApproved); // Debug log
+     if(!vendor.isApproved){
+       req.flash("error", "Your request is not approved! Please wait for Approval. Our Ants team will contact you soon.");
+       return res.redirect("/vendor/login");
+     }
+     req.logIn(vendor, function (err) {
+       if (err) {
+         req.flash("error", err.message);
+         return res.redirect("/vendor/login");
+       }
+       return res.redirect("/myservices");
+     });
+   })(req, res, next);
+ });
+
+// ROUTE FOR THE VENDOR REGISTRATION PAGE
+router.get("/vendor/register",async function (req, res) {
+  try {
+    // Fetching services and subservices from the database
+    const services = await Service.find({});
+    
+  res.render("vendor/v_register", {
+    error: null,  // Default value for errors
+    fname: "",lname: "",username: "",email: "",confirmemail: "",address: "",area: "",city: "",state: "",
+    pincode: "",mobile: "",service: "",subservice: "",description: "",experience: "",visitCharge: "",
+    services: services, // Pass the list of services to the template
+    subservices: []  // Pass the list of subservices to the template
+  });
+}  catch (err) {
+  console.error(err);
+  res.render("vendor/v_register", {
+    error: "Failed to load services",
+    fname: "",lname: "",username: "",email: "",confirmemail: "",address: "",area: "",city: "",state: "",
+    pincode: "",mobile: "",service: "",subservice: "",description: "",experience: "",visitCharge: "",services: [],
+    subservices: []
+  });
+}
+});
+
+// ROUTE FOR FETCHING SUBSERVICES BASED ON SELECTED SERVICE
+router.get("/vendor/getSubservices/:serviceId", async (req, res) => {
+  const serviceId = req.params.serviceId; // Get the selected service ID from the request parameters
+
+  try {
+    // Fetch subservices that belong to the selected service
+    const subservices = await Subservice.find({ service: serviceId });
+
+    // Send the subservices as a JSON response
+    res.json(subservices);
+  } catch (err) {
+    console.error("Error fetching subservices:", err);
+    res.status(500).json({ error: "Failed to fetch subservices" });
+  }
+});
+
+
 
 //ROUTE FOR THE VENDOR REGISTERATION
 router.post("/vendor/register", upload.single("image"), function (req, res) {
@@ -107,20 +158,39 @@ router.post("/vendor/register", upload.single("image"), function (req, res) {
   req.checkBody("confirmemail", "Emails do not match").equals(req.body.email);
   req.checkBody("password", "Password must be 8 - 20 characters long with one uppercase letter, one lowercase letter and one number").matches("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,30}$");
   req.checkBody("confirmpassword", "Passwords do not match").equals(req.body.password);
-  // req.checkBody("area", "Area is not valid").isAlpha();
-  // req.checkBody("city", "City is not valid").isAlpha();
-  // req.checkBody("state", "State is not valid").isAlpha();
   req.checkBody("area", "Area is not valid").matches(/^[a-zA-Z\s]+$/, "i");
   req.checkBody("city", "City is not valid").matches(/^[a-zA-Z\s]+$/, "i");
   req.checkBody("state", "State is not valid").matches(/^[a-zA-Z\s]+$/, "i");
   req.checkBody("pincode", "Pincode is not valid").isNumeric({ no_symbols: true });
   req.checkBody("mobile", "Mobile number can only have numbers").isNumeric({ no_symbols: true });
   req.checkBody("mobile", "Mobile number is not valid").matches("^[6-9][0-9]{9}$");
+  req.checkBody("service", "Service cannot be empty").notEmpty();
+  req.checkBody("subservice", "Subservice cannot be empty").notEmpty();
+  req.checkBody("description", "Description cannot be empty").notEmpty();
 
+
+  // Get validation errors
   var errors = req.validationErrors();
   if (errors) {
-    res.render("vendor/v_register", {
-      error: errors[0].msg
+    // Render the form with the error message and preserve field values
+    return res.render("vendor/v_register", {
+      error: errors[0].msg,
+      fname: fname,
+      lname: lname,
+      username: username,
+      email: email,
+      confirmemail: confirmemail,
+      address: address,
+      area: area,
+      city: city,
+      state: state,
+      pincode: pincode,
+      mobile: mobile,
+      service: service,
+      subservice: subservice,
+      description: description,
+      experience: experience,
+      visitCharge: visitCharge
     });
   } else {
     cloudinary.v2.uploader.upload(req.file.path, function (err, result) {
@@ -134,6 +204,7 @@ router.post("/vendor/register", upload.single("image"), function (req, res) {
         lname: lname,
         username: username,
         email: email,
+        confirmemail: confirmemail,
         address: address,
         area: area,
         city: city,
@@ -156,7 +227,7 @@ router.post("/vendor/register", upload.single("image"), function (req, res) {
         }
         passport.authenticate("vendor")(req, res, function () {
           req.flash("success", "Successfully Signed Up! Nice to meet you " + req.body.username);
-          res.redirect("/services");
+          res.redirect("/myservices");
         });
       });
     });
@@ -168,214 +239,209 @@ router.get("/vendor/:id/edit", middleware.isLoggedIn, function (req, res) {
   res.render("vendor/v_edit");
 });
 
-//ROUTE FOR THE VENDOR UPDATE PAGE
-router.put("/vendor/:id", middleware.isLoggedIn, upload.single("image"), function (req, res) {
+// ROUTE FOR THE VENDOR UPDATE PAGE
+router.put("/vendor/:id", middleware.isLoggedIn, upload.single("image"), async (req, res) => {
+  const {
+    fname,
+    lname,
+    username,
+    email,
+    area,
+    city,
+    state,
+    pincode,
+    mobile,
+    description,
+    experience,
+    visitCharge,
+  } = req.body;
 
-  var fname = req.body.fname;
-  var lname = req.body.lname;
-  var email = req.body.email;
-  var area = req.body.area;
-  var city = req.body.city;
-  var state = req.body.state;
-  var pincode = req.body.pincode;
-  var mobile = req.body.mobile;
-  var description = req.body.description;
-  var experience = req.body.experience;
-  var visitCharge = req.body.visitCharge;
-
- /*  req.checkBody("fname", "First Name can only have letters").isAlpha();
+  // Input validation
+  req.checkBody("fname", "First Name can only have letters").isAlpha();
   req.checkBody("lname", "Last Name can only have letters").isAlpha();
+  req.checkBody("username", "Username can only have letters and numbers").isAlphanumeric();
   req.checkBody("email", "Email is not valid").isEmail();
-  req.checkBody("area", "Area is not valid").isAlpha();
-  req.checkBody("city", "City is not valid").isAlpha();
-  req.checkBody("state", "State is not valid").isAlpha();
+  req.checkBody("area", "Area is not valid").matches(/^[a-zA-Z\s]+$/, "i");
+  req.checkBody("city", "City is not valid").matches(/^[a-zA-Z\s]+$/, "i");
+  req.checkBody("state", "State is not valid").matches(/^[a-zA-Z\s]+$/, "i");
   req.checkBody("pincode", "Pincode is not valid").isNumeric({ no_symbols: true });
   req.checkBody("mobile", "Mobile number can only have numbers").isNumeric({ no_symbols: true });
-  req.checkBody("mobile", "Mobile number is not valid").matches("^[6-9][0-9]{9}$"); */
-  req.checkBody("fname", "First Name can only have letters").isAlpha();
-req.checkBody("lname", "Last Name can only have letters").isAlpha();
-req.checkBody("email", "Email is not valid").isEmail();
-req.checkBody("area", "Area is not valid").matches(/^[a-zA-Z\s]+$/, "i");
-req.checkBody("city", "City is not valid").matches(/^[a-zA-Z\s]+$/, "i");
-req.checkBody("state", "State is not valid").matches(/^[a-zA-Z\s]+$/, "i");
-req.checkBody("pincode", "Pincode is not valid").isNumeric({ no_symbols: true });
-req.checkBody("mobile", "Mobile number can only have numbers").isNumeric({ no_symbols: true });
-req.checkBody("mobile", "Mobile number is not valid").matches("^[6-9][0-9]{9}$");
+  req.checkBody("mobile", "Mobile number is not valid").matches("^[6-9][0-9]{9}$");
 
-
-  var errors = req.validationErrors();
+  const errors = req.validationErrors();
   if (errors) {
-    res.render("vendor/v_edit", {
-      error: errors[0].msg
+    return res.render("vendor/v_edit", {
+      error: errors[0].msg,
     });
-  } else {
-    Vendor.findById(req.params.id, async function (err, vendor) {
-      if (err) {
-        req.flash("error", err.message);
-        res.redirect("/vendor/" + req.params.id + "/edit");
-      } else {
-        if (req.file) {
-          try {
-            await cloudinary.v2.uploader.destroy(vendor.imageId);
-            var result = await cloudinary.v2.uploader.upload(req.file.path);
-            vendor.image = result.secure_url;
-            vendor.imageId = result.public_id;
-          } catch (err) {
-            req.flash("error", err.message);
-            return res.redirect("back");
-          }
+  }
+
+  try {
+    // Find the vendor by ID
+    const vendor = await Vendor.findById(req.params.id);
+    if (!vendor) {
+      req.flash("error", "Vendor not found");
+      return res.redirect("/vendor/" + req.params.id + "/edit");
+    }
+
+    // Handle image upload if a new image is provided
+    if (req.file) {
+      try {
+        // Delete the existing image from Cloudinary
+        if (vendor.imageId) {
+          await cloudinary.v2.uploader.destroy(vendor.imageId);
         }
-        vendor.fname = fname;
-        vendor.lname = lname;
-        vendor.email = email;
-        vendor.area = area;
-        vendor.city = city;
-        vendor.state = state;
-        vendor.pincode = pincode;
-        vendor.mobile = mobile;
-        vendor.description = description;
-        vendor.experience = experience;
-        vendor.visitCharge = visitCharge;
-        vendor.save();
-        req.flash("success", "Successfully updated details for " + vendor.username);
-        res.redirect("/services");
+
+        // Upload the new image to Cloudinary
+        const result = await cloudinary.v2.uploader.upload(req.file.path);
+        vendor.image = result.secure_url;
+        vendor.imageId = result.public_id;
+      } catch (err) {
+        req.flash("error", "Image upload failed: " + err.message);
+        return res.redirect("back");
       }
-    });
+    }
+
+    // Update vendor details
+    vendor.fname = fname;
+    vendor.lname = lname;
+    vendor.username = username;
+    vendor.email = email;
+    vendor.area = area;
+    vendor.city = city;
+    vendor.state = state;
+    vendor.pincode = pincode;
+    vendor.mobile = mobile;
+    vendor.description = description;
+    vendor.experience = experience;
+    vendor.visitCharge = visitCharge;
+
+    // Save the updated vendor details
+    await vendor.save();
+
+    req.flash("success", "Successfully updated details for " + vendor.username);
+    res.redirect("/myservices");
+  } catch (err) {
+    req.flash("error", "Something went wrong: " + err.message);
+    res.redirect("/vendor/" + req.params.id + "/edit");
   }
 });
 
-//ROUTE FOR VENDOR FORGOT PASSWORD PAGE
-router.get("/vendor/forgot", function (req, res) {
+
+// ROUTE FOR VENDOR FORGOT PASSWORD PAGE
+router.get("/vendor/forgot", (req, res) => {
   res.render("vendor/v_forgotpassword");
 });
 
-//ROUTE FOR VENDOR FORGOT PASSWORD
-router.post("/vendor/forgot", function (req, res, next) {
-  async.waterfall([
-    function (done) {
-      crypto.randomBytes(20, function (err, buf) {
-        var token = buf.toString("hex");
-        done(err, token);
+// POST ROUTE FOR VENDOR FORGOT PASSWORD
+router.post("/vendor/forgot", async (req, res, next) => {
+  try {
+    // Generate token
+    const token = await new Promise((resolve, reject) => {
+      crypto.randomBytes(20, (err, buf) => {
+        if (err) reject(err);
+        resolve(buf.toString("hex"));
       });
-    },
-    function (token, done) {
-      Vendor.findOne({ email: req.body.email }, function (err, user) {
-        if (!user) {
-          req.flash("error", "No account with that email address exists.");
-          return res.redirect("/vendor/forgot");
-        }
+    });
 
-        user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-
-        user.save(function (err) {
-          done(err, token, user);
-        });
-      });
-    },
-    function (token, user, done) {
-      var smtpTransport = nodemailer.createTransport({
-        service: "Gmail",
-        auth: {
-          user: process.env.GMAIL_USER,
-          pass: process.env.GMAILPW
-        }
-      });
-      var mailOptions = {
-        to: user.email,
-        from: process.env.GMAIL_USER,
-        subject: "Ants Password Reset",
-        text: "You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n" +
-          "Please click on the following link, or paste this into your browser to complete the process:\n\n" +
-          "http://" + req.headers.host + "/vendor/reset/" + token + "\n\n" +
-          "If you did not request this, please ignore this email and your password will remain unchanged.\n"
-      };
-      smtpTransport.sendMail(mailOptions, function (err) {
-        req.flash("success", "An e-mail has been sent to " + user.email + " with further instructions.");
-        done(err, "done");
-      });
+    // Find vendor by email
+    const user = await Vendor.findOne({ email: req.body.email });
+    if (!user) {
+      req.flash("error", "No account with that email address exists.");
+      return res.redirect("/vendor/forgot");
     }
-  ], function (err) {
-    if (err) return next(err);
+
+    // Set reset token and expiration
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Prepare email content
+    const resetLink = `http://${req.headers.host}/vendor/reset/${token}`;
+
+    // Fetch email template for customer reset email
+    const userTemplate = await EmailTemplate.findOne({ name: 'user_password_reset' });
+    const userMailOptions = {
+        to: user.email, // User's email
+        placeholderData: {
+            resetLink: resetLink
+        }
+    };
+    await emailcontrollers.sendEmail('user_password_reset', user.email, userMailOptions.placeholderData);
+    
+    // Fetch email template for admin notification email
+    const adminTemplate = await EmailTemplate.findOne({ name: 'admin_password_reset' });
+    const adminMailOptions = {
+        to: process.env.ADMIN_EMAIL, // Admin's email from environment variables
+        placeholderData: {
+            email: user.email
+        }
+    };
+    await emailcontrollers.sendEmail('admin_password_reset', process.env.ADMIN_EMAIL, adminMailOptions.placeholderData);
+
+    req.flash("success", "An e-mail has been sent to " + user.email + " with further instructions.");
     res.redirect("/vendor/forgot");
-  });
+  } catch (err) {
+    next(err);
+  }
 });
 
-//ROUTE FOR VENDOR RESET PASSWORD PAGE
-router.get("/vendor/reset/:token", function (req, res) {
-  Vendor.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function (err, user) {
+// ROUTE FOR VENDOR RESET PASSWORD PAGE
+router.get("/vendor/reset/:token", async (req, res) => {
+  try {
+    const user = await Vendor.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
     if (!user) {
       req.flash("error", "Password reset token is invalid or has expired.");
       return res.redirect("/vendor/forgot");
     }
+
     res.render("vendor/v_resetpassword", { token: req.params.token });
-  });
-});
-
-//ROUTE FOR VENDOR RESET PASSWORD
-router.post("/vendor/reset/:token", function (req, res) {
-  async.waterfall([
-    function (done) {
-      Vendor.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function (err, user) {
-        if (!user) {
-          req.flash("error", "Password reset token is invalid or has expired.");
-          return res.redirect("back");
-        }
-        if (req.body.password === req.body.confirm) {
-          user.setPassword(req.body.password, function (err) {
-            user.resetPasswordToken = undefined;
-            user.resetPasswordExpires = undefined;
-
-            user.save(function (err) {
-              req.logIn(user, function (err) {
-                done(err, user);
-              });
-            });
-          })
-        } else {
-          req.flash("error", "Passwords do not match.");
-          return res.redirect("back");
-        }
-      });
-    },
-    function (user, done) {
-      var smtpTransport = nodemailer.createTransport({
-        service: "Gmail",
-        auth: {
-          user: process.env.GMAIL_USER,
-          pass: process.env.GMAILPW
-        }
-      });
-      var mailOptions = {
-        to: user.email,
-        from: process.env.GMAIL_USER,
-        subject: "Ants: Your password has been changed",
-        text: "Hello,\n\n" +
-          "This is a confirmation that the password for your account " + user.email + " has just been changed.\n"
-      };
-      smtpTransport.sendMail(mailOptions, function (err) {
-        req.flash("success", "Success! Your password has been changed.");
-        done(err);
-      });
-    }
-  ], function (err) {
-    res.redirect("/services");
-  });
-});
-
-/* // Route for rendering the Salon at Home page
-router.get('/booking/salon_at_home', async (req, res) => {
-  try {
-      // Fetch vendor details from MongoDB
-      const vendor = await Vendor.find({});
-
-      // Pass the vendor data to the EJS template
-      res.render('beauty/salon_at_home', { vendor });
   } catch (err) {
-      console.error(err);
-      res.status(500).send('Error fetching vendor data');
+    req.flash("error", "Something went wrong.");
+    res.redirect("/vendor/forgot");
   }
-}); */
+});
+
+// POST ROUTE FOR VENDOR RESET PASSWORD
+router.post("/vendor/reset/:token", async (req, res) => {
+  try {
+    const user = await Vendor.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      req.flash("error", "Password reset token is invalid or has expired.");
+      return res.redirect("/vendor/forgot");
+    }
+
+    if (req.body.password !== req.body.confirm) {
+      req.flash("error", "Passwords do not match.");
+      return res.redirect("back");
+    }
+
+    // Use passport-local-mongoose to set a new password
+    await user.setPassword(req.body.password);
+
+    // Clear reset token and expiration
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    req.flash("success", "Your password has been successfully updated!");
+    res.redirect("/vendor/login");
+  } catch (err) {
+    req.flash("error", "Something went wrong.");
+    res.redirect("back");
+  }
+});
+
+
+
 
 
 //ROUTE TO SEE ALL THE VENDORS LIST DEPENDING ON SERVICE AND SUBSERVICE
@@ -390,26 +456,204 @@ router.get('/booking/salon_at_home', async (req, res) => {
 });  */
 
 //ROUTE TO SEE THE SPECIFIC VENDOR DEPENDING ON SERVICE, SUBSERVICE AND VENDOR ID
- router.get("/:service/:subservice/:id", middleware.isLoggedIn, function (req, res) {
-  Vendor.findById(req.params.id).populate("comments").exec(function (err, foundVendor) {
-    if (err) {
-      req.flash("error", err.message);
-    } else if (!foundVendor.isApproved) {
+router.get("/:service/:subservice/:id", middleware.isLoggedIn, async (req, res) => {
+  try {
+    // Find the vendor and populate comments
+    const foundVendor = await Vendor.findById(req.params.id).populate("comments").exec();
+
+    if (!foundVendor) {
+      req.flash("error", "Vendor not found!");
+      return res.redirect("/myservices");
+    }
+
+    // Check if vendor is approved
+    if (!foundVendor.isApproved) {
       if (res.locals.currentUser.isCustomer) {
         req.flash("error", "Not Allowed!");
-        res.redirect("/services");
+        return res.redirect("/myservices");
+      } else if (res.locals.currentUser.username !== foundVendor.username) {
+        req.flash("error", "Not Allowed!");
+        return res.redirect("/myservices");
       } else {
-        if (res.locals.currentUser.username != foundVendor.username) {
-          req.flash("error", "Not Allowed!");
-          res.redirect("/services");
-        } else {
-          res.render("vendor/v_show", { vendor: foundVendor, error: "Your profile is not verified yet and will not be visible to others. Ants team will contact you soon for verification." });
-        }
+        return res.render("vendor/v_show", {
+          vendor: foundVendor,
+          error: "Your profile is not verified yet and will not be visible to others. Ants team will contact you soon for verification.",
+        });
       }
-    } else {
-      res.render("vendor/v_show", { vendor: foundVendor });
     }
-  });
-}); 
+
+    // Render vendor page if approved
+    res.render("vendor/v_show", { vendor: foundVendor });
+  } catch (err) {
+    req.flash("error", err.message);
+    res.redirect("/myservices");
+  }
+});
+
+/////////////////////////////////////////BOOKING DETAILS/////////////////////////////////
+/// Route to get booking details for a vendor
+router.get('/booking/bookingdetails', async (req, res) => {
+  if (!req.user || req.user.isCustomer) {
+      return res.redirect('/'); // Redirect non-vendors
+  }
+
+  try {
+      // Fetch active and cancelled bookings separately
+      const activeBookings = await Booking.find({ "vendor.username": req.user.username, stage: "active" });
+      /* const cancelledBookings = await Booking.find({ "vendor.username": req.user.username, stage: "cancelled" }); */
+
+      let pendingBookings = [];
+      let completedBookings = [];
+      let cancelledBookings = [];
+
+      if (activeBookings.length > 0) {
+          // Fetch pending and completed bookings if stage is active
+          pendingBookings = await Booking.find({ 
+              "vendor.username": req.user.username, 
+              status: 'Pending',
+              stage: 'active' 
+          }).populate({
+              path: 'user',
+              populate: {
+                  path: 'addresses',
+                  match: { isDefault: true }, // Fetch only the default address
+              }
+          }).exec();
+
+          completedBookings = await Booking.find({ 
+              "vendor.username": req.user.username, 
+              status: 'Completed',
+              stage: 'active' 
+          }).populate({
+              path: 'user',
+              populate: {
+                  path: 'addresses',
+                  match: { isDefault: true }, // Fetch only the default address
+              }
+          }).exec();
+      }
+        // Fetch cancelled bookings and populate user details
+        cancelledBookings = await Booking.find({ 
+          "vendor.username": req.user.username, 
+          stage: 'cancelled' 
+      }).populate({
+          path: 'user',
+          populate: {
+              path: 'addresses',
+              match: { isDefault: true }, // Fetch only the default address
+          }
+      }).exec();
+
+      res.render('booking/bookingdetails', {
+          currentUser: req.user,
+          pendingBookings,
+          completedBookings,
+          cancelledBookings, // Show cancelled bookings if any
+      });
+
+  } catch (error) {
+      console.error('Error fetching bookings:', error);
+      res.render('booking/bookingdetails', {
+          currentUser: req.user,
+          pendingBookings: [],
+          completedBookings: [],
+          cancelledBookings: [],
+          error: 'Error fetching booking details.',
+      });
+  }
+});
+
+// POST method to mark a booking as Completed
+router.post('/booking/bookingdetails/:id/complete', async (req, res) => {
+  try {
+      // Find the booking and check if it's active before updating
+      const booking = await Booking.findById(req.params.id);
+
+      if (!booking) {
+          return res.redirect('/booking/bookingdetails');
+      }
+
+      // Only update the status if the booking stage is "active"
+      if (booking.stage === "active") {
+          await Booking.findByIdAndUpdate(req.params.id, { status: 'Completed' });
+      } else {
+          console.log("Booking cannot be completed as it is cancelled.");
+      }
+
+      res.redirect('/booking/bookingdetails');
+
+  } catch (error) {
+      console.error('Error updating booking status:', error);
+      res.redirect('/booking/bookingdetails');
+  }
+});
+
+///////////////////////////////////////service table////////////////////////////////////////////
+
+router.get("/myservices", async (req, res) => {
+  try {
+    const vendorId = req.user._id;
+
+    // Find the vendor to get its service and subservice
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      return res.status(404).send("Vendor not found!!!");
+    }
+
+    const { service, subservice } = vendor;
+
+    // Fetch all worktypes that match the vendor's service and subservice
+    const worktypes = await Worktype.find({ service, subservice });
+
+    // Merge with existing prices from vendor.worktypePrices
+    const worktypesWithPrices = worktypes.map(worktype => {
+      const existingPrice = vendor.worktypePrices.find(wp => wp.worktype.toString() === worktype._id.toString());
+      return {
+        _id: worktype._id,
+        name: worktype.name,
+        price: existingPrice ? existingPrice.price : 0 // Default price is 0 if not set
+      };
+    });
+
+    res.render("myservices", { worktypes: worktypesWithPrices });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+
+router.post("/update-price/:id", async (req, res) => {
+  try {
+    const vendorId = req.user._id;
+    const { id } = req.params; // Worktype ID
+    const { price } = req.body;
+
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      return res.status(404).send("Vendor not found");
+    }
+
+    // Check if worktype already exists in vendor.worktypePrices
+    let worktypeEntry = vendor.worktypePrices.find(wp => wp.worktype.toString() === id);
+
+    if (worktypeEntry) {
+      // Update existing worktype price
+      worktypeEntry.price = price;
+    } else {
+      // Add new worktype price entry
+      vendor.worktypePrices.push({ worktype: id, price });
+    }
+
+    await vendor.save();
+
+    res.redirect("back"); // Reload the page
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+
 
 module.exports = router;

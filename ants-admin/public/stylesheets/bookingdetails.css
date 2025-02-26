@@ -1,0 +1,120 @@
+/* General Body Styling */
+body, html {
+    height: 150%;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Jumbotron Styling */
+.jumbotron {
+    background-color: #f8f9fa;
+    padding: 40px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.jumbotron h1 {
+    font-size: 36px;
+    margin-bottom: 15px;
+}
+
+.jumbotron p {
+    font-size: 18px;
+}
+
+/* List Group Styling for Bookings */
+.list-group {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* List Items for Each Booking */
+.list-group-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f1f1f1;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Strong Tag Styling for Bold Text */
+.list-group-item strong {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Styling for Text Inside Each List Item */
+.list-group-item {
+    font-size: 16px;
+}
+
+.list-group-item br {
+    margin-bottom: 8px;
+}
+
+/* No Bookings Message */
+p {
+    text-align: center;
+    font-size: 18px;
+    color: #888;
+}
+
+/* Scroll-to-Top Button Styling */
+#scrollToTopBtn {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    padding: 15px;
+    font-size: 18px;
+    cursor: pointer;
+    display: none; /* Initially hidden */
+    z-index: 999;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+#scrollToTopBtn:hover {
+    background-color: #0056b3;
+}
+
+/* Responsive Styling for Small Screens */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .jumbotron h1 {
+        font-size: 28px;
+    }
+
+    .list-group-item {
+        font-size: 14px;
+    }
+
+    #scrollToTopBtn {
+        bottom: 20px;
+        right: 20px;
+    }
+}

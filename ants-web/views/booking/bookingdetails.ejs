@@ -1,0 +1,118 @@
+<% include ../partials/header %>
+
+<title>Booking Details</title>
+<link rel="stylesheet" href="/stylesheets/bookingdetails.css" />
+
+<% include ../partials/navbar %>
+
+<div class="container booking-details-container">
+    <h1>AWAITING BOOKING FOR YOU </h1>
+    <hr>
+
+    <h2>PENDING SERVICES</h2>
+    <% if (pendingBookings && pendingBookings.length > 0) { %>
+        <ul class="list-group">
+            <% pendingBookings.forEach(function(booking) { %>
+                <li class="list-group-item">
+                    <strong>Customer:</strong> <%= booking.user ? `${booking.user.fname} ${booking.user.lname}` : 'Unknown' %> <br>
+                    <strong>Date:</strong> <%= booking.date %> <br>
+                    <strong>Time:</strong> <%= booking.time %> <br>
+                    <strong>Service:</strong> <%= booking.serviceName %> (<%= booking.subServiceName %>)(<%= booking.worktype %>) <br>
+                    <% if (booking.user && booking.user.addresses && booking.user.addresses.length > 0) { %>
+                        <strong>Address:</strong> 
+                        <%= booking.user.addresses[0].address %>, 
+                        <%= booking.user.addresses[0].area %>, 
+                        <%= booking.user.addresses[0].city %>, 
+                        <%= booking.user.addresses[0].state %> - 
+                        <%= booking.user.addresses[0].pincode %> <br>
+                        <strong>Mobile:</strong> <%= booking.user.addresses[0].mobile %> <br>
+                    <% } else { %>
+                        <strong>Address:</strong> Not available <br>
+                    <% } %>
+                    <form action="/booking/bookingdetails/<%= booking._id %>/complete" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-success btn-sm">Mark as Completed</button>
+                    </form>
+                </li>
+            <% }); %>
+        </ul>
+    <% } else { %>
+        <p>No pending services.</p>
+    <% } %>
+
+    <hr>
+    <h2>COMPLETED SERVICES</h2>
+    <button id="toggleCompleted" class="btn btn-secondary btn-sm">DATA</button>
+    <div id="completedSection" style="display: none;">
+        <% if (completedBookings && completedBookings.length > 0) { %>
+            <ul class="list-group">
+                <% completedBookings.forEach(function(booking) { %>
+                    <li class="list-group-item">
+                        <strong>Customer:</strong> <%= booking.user ? `${booking.user.fname} ${booking.user.lname}` : 'Unknown' %> <br>
+                        <strong>Date:</strong> <%= booking.date %> <br>
+                        <strong>Time:</strong> <%= booking.time %> <br>
+                        <strong>Service:</strong> <%= booking.serviceName %> (<%= booking.subServiceName %>)(<%= booking.worktype %>) <br>
+                        <% if (booking.user && booking.user.addresses && booking.user.addresses.length > 0) { %>
+                            <strong>Address:</strong> 
+                            <%= booking.user.addresses[0].address %>, 
+                            <%= booking.user.addresses[0].area %>, 
+                            <%= booking.user.addresses[0].city %>, 
+                            <%= booking.user.addresses[0].state %> - 
+                            <%= booking.user.addresses[0].pincode %> <br>
+                            <strong>Mobile:</strong> <%= booking.user.addresses[0].mobile %> <br>
+                        <% } else { %>
+                            <strong>Address:</strong> Not available <br>
+                        <% } %>
+                    </li>
+                <% }); %>
+            </ul>
+        <% } else { %>
+            <p>No completed services.</p>
+        <% } %>
+    </div>
+
+<hr>
+
+    <h2>CUSTOMER CANCELLED SERVICES</h2>
+    <button id="toggleCancelled" class="btn btn-secondary btn-sm">CANCELLED SERVICES</button>
+    <div id="cancelledSection" style="display: none;">
+    <% if (cancelledBookings && cancelledBookings.length > 0) { %>
+        <ul class="list-group">
+            <% cancelledBookings.forEach(function(booking) { %>
+                <li class="list-group-item cancelled">
+                    <strong>Customer:</strong> <%= booking.user ? `${booking.user.fname} ${booking.user.lname}` : 'Unknown' %> <br>
+                    <strong>Date:</strong> <%= booking.date %> <br>
+                    <strong>Time:</strong> <%= booking.time %> <br>
+                    <strong>Service:</strong> <%= booking.serviceName %> (<%= booking.subServiceName %>)(<%= booking.worktype %>) <br>
+                    <% if (booking.user && booking.user.addresses && booking.user.addresses.length > 0) { %>
+                        <strong>Address:</strong> 
+                        <%= booking.user.addresses[0].address %>, 
+                        <%= booking.user.addresses[0].area %>, 
+                        <%= booking.user.addresses[0].city %>, 
+                        <%= booking.user.addresses[0].state %> - 
+                        <%= booking.user.addresses[0].pincode %> <br>
+                        <strong>Mobile:</strong> <%= booking.user.addresses[0].mobile %> <br>
+                    <% } else { %>
+                        <strong>Address:</strong> Not available <br>
+                    <% } %>
+                    <span class="text-danger"><strong>Cancelled by Customer</strong></span>
+                </li>
+            <% }); %>
+        </ul>
+    <% } else { %>
+        <p>No cancelled services.</p>
+    <% } %>
+
+</div>
+<script>
+    document.getElementById('toggleCompleted').addEventListener('click', function() {
+        const completedSection = document.getElementById('completedSection');
+        completedSection.style.display = completedSection.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('toggleCancelled').addEventListener('click', function() {
+        const cancelledSection = document.getElementById('cancelledSection');
+        cancelledSection.style.display = cancelledSection.style.display === 'none' ? 'block' : 'none';
+    });
+</script>
+
+<% include ../partials/footer %>

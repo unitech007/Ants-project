@@ -1,31 +1,86 @@
 <% include ../partials/header %>
 
-<meta name="description" content="Ants: My Booking">
+<meta name="description" content="Ants: <%= __('mybooking') %>">
 <link rel="stylesheet" href="/stylesheets/booking.css" />
-<title>My Booking</title>
+<title><%= __('common.bmybooking') %></title>
 
 <% include ../partials/navbar %>
 
 <div class="container">
     <header class="jumbotron">
-        <h1>Your Booking Details</h1>
+        <h1><%= __('common.your_booking_details') %></h1>
     </header>
-
+    <!-- Flash Message -->
+    <% if (messages && messages.length > 0) { %>
+        <div class="alert alert-success">
+            <%= messages[0] %>
+        </div>
+    <% } %>
+</div>
+<div class="booking-container">
     <% if (bookings.length > 0) { %>
         <ul>
             <% bookings.forEach(function(booking) { %>
-                <li>
-                    <strong>Service:</strong> <%= booking.serviceName %> <br />
-                    <strong>Subservice:</strong> <%= booking.subServiceName %> <br />
-                    <strong>Date:</strong> <%= booking.date %> <br />
-                    <strong>Time:</strong> <%= booking.time %> <br />
-                    <strong>Vendor:</strong> <%= booking.vendor %>
+                <li id="booking-<%= booking._id %>">
+                    <strong><%= __('common.service') %>:</strong> <%= booking.serviceName %> <br />
+                    <strong><%= __('common.subservice') %>:</strong> <%= booking.subServiceName %> <br />
+                    <strong><%= __('common.worktype') %>:</strong> <%= booking.worktype %> <br />
+                    <strong><%= __('common.worktypePrices') %>:</strong> ₹<%= booking.worktypePrices %> <br />
+                    <strong><%= __('common.date') %>:</strong> <%= booking.date %> <br />
+                    <strong><%= __('common.time') %>:</strong> <%= booking.time %> <br />
+                    <strong><%= __('common.bvendor') %>:</strong> <%= booking.vendor.username %> <br />
+                    (<%= __('common.experience') %>: <%= booking.vendor.experience %>,<br />
+                    <%= __('common.visit_charge') %>: ₹<%= booking.vendor.visitCharge %>)<br />
+                    <strong><%= __('common.total_price') %>:</strong> <span style="color: green;">₹<%= booking.totalPrice %></span>
+
+                    <div class="booking-actions">
+                        <!-- Edit Button -->
+                        <a href="/editbooking/<%= booking._id %>" class="btn btn-danger edit-booking">
+                            <%= __('common.edit') %>
+                        </a>
+
+                        <!-- Cancel Button -->
+                        <button class="btn btn-danger cancel-booking" data-id="<%= booking._id %>">
+                            <%= __('common.cancel') %>
+                        </button>
+                    </div>
                 </li>
             <% }) %>
         </ul>
     <% } else { %>
-        <p>No bookings found.</p>
+        <p><%= __('common.no_bookings_found') %></p>
     <% } %>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".cancel-booking").forEach(button => {
+            button.addEventListener("click", function () {
+                const bookingId = this.getAttribute("data-id");
+
+                if (confirm("Sure you want to cancel the service? Once cancelled, it cannot be redeemed.")) {
+                    fetch(`/mybooking/cancel-booking/${bookingId}`, { 
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Booking cancelled successfully.");
+                            window.location.reload(); // Refresh page to hide cancelled bookings
+                        } else {
+                            alert("Error: " + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error cancelling booking:", error);
+                        alert("Error cancelling booking: " + error.message);
+                    });
+                }
+            });
+        });
+    });
+</script>
+
 
 <% include ../partials/footer %>

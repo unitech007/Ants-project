@@ -1,21 +1,21 @@
 <% include ../partials/header %>
 
-    <title>Enquiries</title>
+    <title><%= __('common.admin_enquiry_title') %></title>
     <link rel="stylesheet" href="/stylesheets/enquiry.css" />
 
 <% include ../partials/navbar %>
 <div class="enquiries-list-container">
-    <h1>All Enquiries</h1>
+    <h1><%= __('common.admin_enquiry_heading') %></h1>
     <table border="1">
         <thead>
             <tr>
                 <th>#</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Mobile</th>
-                <th>Subject</th>
-                <th>Message</th>
-                <th>Date</th>
+                <th><%= __('common.admin_enquiry_name') %></th>
+                <th><%= __('common.admin_enquiry_email') %></th>
+                <th><%= __('common.admin_enquiry_mobile') %></th>
+                <th><%= __('common.admin_enquiry_subject') %></th>
+                <th><%= __('common.admin_enquiry_message') %></th>
+                <th><%= __('common.admin_enquiry_date') %></th>
             </tr>
         </thead>
         <tbody>

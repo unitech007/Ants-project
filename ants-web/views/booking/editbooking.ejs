@@ -1,0 +1,147 @@
+<% include ../partials/header %>
+
+<meta name="description" content="<%= __('common.booking_meta_description') %>">
+<link rel="stylesheet" href="/stylesheets/booking.css" />
+<title><%= __('common.booking_title') %></title>
+
+<% include ../partials/navbar %>
+
+<div class="container">
+    <header class="jumbotron">
+        <div class="container">
+          <h1><%= __('common.editbooking_header') %> - <%= __('common.' + booking.serviceName) %> - <%= __('common.' + booking.subServiceName) %> </h1>
+          <p><%= __('common.booking_subheader') %> <%= __('common.' + booking.subServiceName) %></p>
+          
+        </div>
+    </header>
+
+    <!-- Booking Form -->
+    <form id="booking-form" action="/editbooking/<%= booking._id %>?_method=PUT" method="POST">
+        <input type="hidden" name="_method" value="PUT">
+
+        <!-- Date Input -->
+        <div class="form-group">
+            <label for="date"><%= __('common.enter_date_label') %></label>
+            <input type="date" id="date" name="date" class="form-control" required value="<%= booking.date %>" min="<%= new Date().toISOString().split('T')[0] %>">
+        </div>
+
+        <!-- Time Input -->
+        <div class="form-group">
+            <label for="time"><%= __('common.enter_time_label') %></label>
+            <input type="time" id="time" name="time" class="form-control" required value="<%= booking.time %>">
+        </div>
+
+        <!-- Vendor List Dropdown -->
+<div class="form-group">
+    <label for="vendor"><%= __('common.select_vendor_label') %></label>
+    <select id="vendor" name="vendor[id]" class="form-control" required>
+        <option value="" disabled><%= __('common.select_vendor_placeholder') %></option>
+        <% vendor.forEach(function(vendor) { %>
+          <option value="<%= vendor._id %>" 
+              <%= (booking.vendor && booking.vendor.username === vendor.username) ? 'selected' : '' %> 
+              data-visit-charge="<%= vendor.visitCharge %>" 
+              data-experience="<%= vendor.experience %>">
+              <%= vendor.username %> - <%= vendor.experience %> - ₹<%= vendor.visitCharge %>
+          </option>
+        <% }); %>
+    </select>
+  </div>
+  
+  <!-- Work Type Dropdown -->
+<div class="form-group">
+    <label for="worktype"><%= __('common.select_worktype_label') %></label>
+    <select id="worktype" name="worktype" class="form-control" required>
+        <option value="" disabled><%= __('common.select_worktype_placeholder') %></option>
+        <% worktypes.forEach(function(wt) { 
+            let selected = (booking.worktype && booking.worktype === wt.name) ? 'selected' : ''; 
+            let price = (selected ? booking.worktypePrices : wt.price); // Use booking price if selected
+        %>
+            <option value="<%= wt._id %>" 
+                data-price="<%= price %>" 
+                <%= selected %>>
+                <%= wt.name %> - ₹<%= price %>
+            </option>
+        <% }); %>
+    </select>
+  </div>
+  
+  
+  
+
+        <!-- Hidden Fields -->
+        <input type="hidden" id="vendorVisitCharge" name="vendor[visitCharge]" value="<%= booking.vendor.visitCharge %>">
+        <input type="hidden" id="vendorExperience" name="vendor[experience]" value="<%= booking.vendor.experience %>">
+        <input type="hidden" id="worktypePrices" name="worktypePrices" value="<%= booking.worktypePrices %>">
+        <input type="hidden" id="worktypeId" name="worktypename" value="<%= booking.worktypename %>">
+
+        <!-- Hidden Fields for Service and Subservice -->
+        <input type="hidden" name="serviceName" value="<%= booking.serviceName %>">
+        <input type="hidden" name="subServiceName" value="<%= booking.subServiceName %>">
+
+        <!-- Save & Cancel Buttons -->
+        <button type="submit" class="btn btn-primary"><%= __('common.save_button') %></button>
+        <a href="/mybooking" class="btn btn-secondary"><%= __('common.back_button') %></a>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let vendorDropdown = document.getElementById("vendor");
+        let worktypeDropdown = document.getElementById("worktype");
+
+        let preselectedWorktype = "<%= worktype %>";  // Get pre-selected worktype from backend
+        let preselectedWorktypePrice = "<%= worktypePrices %>"; // Get pre-selected price from backend
+
+        function fetchWorktypes(vendorId) {
+            let serviceId = "<%= serviceId %>";
+            let subServiceId = "<%= subServiceId %>";
+            worktypeDropdown.innerHTML = `<option value="" disabled selected>Select Worktype</option>`;
+
+        fetch(`/editbooking/getWorktypes?serviceId=${serviceId}&subServiceId=${subServiceId}&vendorId=${vendorId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.worktypes && data.worktypes.length > 0) {
+                    data.worktypes.forEach(worktype => {
+                        let option = document.createElement("option");
+                        option.value = worktype._id;
+                        option.dataset.price = worktype.price;
+                        option.textContent = `${worktype.name} - ₹${worktype.price}`;
+                        // **Check if this worktype is the pre-selected one and set it**
+                        if (worktype.name === preselectedWorktype) {
+                                option.selected = true;  // Auto-select
+                                document.getElementById('worktypePrices').value = worktype.price;
+                            }
+                        worktypeDropdown.appendChild(option);
+                    });
+                } else {
+                    let noOption = document.createElement("option");
+                    noOption.textContent = "No worktypes available";
+                    worktypeDropdown.appendChild(noOption);
+                }
+            })
+            .catch(error => console.error("Error updating worktypes:", error));
+    }
+    // **Fetch worktypes on initial page load**
+    fetchWorktypes(vendorDropdown.value);
+
+// **Update worktypes on vendor change**
+vendorDropdown.addEventListener("change", function() {
+    fetchWorktypes(this.value);
+});
+
+    document.getElementById('worktype').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        document.getElementById('worktypePrices').value = selectedOption.dataset.price|| 0;
+        document.getElementById('worktypeId').value = selectedOption.value;
+    });
+
+    document.getElementById('vendor').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        document.getElementById('vendorVisitCharge').value = selectedOption.dataset.visitCharge;
+        document.getElementById('vendorExperience').value = selectedOption.dataset.experience;
+    });
+
+});
+</script>
+
+<% include ../partials/footer %>

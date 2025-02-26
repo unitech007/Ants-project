@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+/* document.addEventListener('DOMContentLoaded', function () {
 
 	var beauty = "<option value='salon_at_home'>Salon At Home</option>" +
 		"<option value='hair_artist'>Hair Artist</option>" +
@@ -49,4 +49,42 @@ document.addEventListener('DOMContentLoaded', function () {
 			document.querySelector("#subService").innerHTML = none;
 		}
 	});
-});
+}); */
+
+// select_sub_service.js
+
+document.addEventListener("DOMContentLoaded", function() {
+	const serviceSelect = document.getElementById("service");
+	const subserviceSelect = document.getElementById("subService");
+	
+      
+	// When the service dropdown changes
+	serviceSelect.addEventListener("change", function() {
+	  const serviceId = this.value;
+  
+	  if (serviceId) {
+		// Make AJAX request to get subservices based on the selected service
+		fetch(`/vendor/getSubservices/${serviceId}`)
+		  .then(response => response.json())
+		  .then(subservices => {
+			// Clear the current subservice dropdown
+			subserviceSelect.innerHTML = '<option value="">Select Subservice</option>';
+  
+			// Populate the subservice dropdown with the new subservices
+			subservices.forEach(function(subservice) {
+			  const option = document.createElement("option");
+			  option.value = subservice._id;
+			  option.textContent = subservice.name;
+			  subserviceSelect.appendChild(option);
+			});
+		  })
+		  .catch(err => {
+			console.error("Error fetching subservices:", err);
+		  });
+	  } else {
+		// If no service is selected, reset the subservice dropdown
+		subserviceSelect.innerHTML = '<option value="">Select Subservice</option>';
+	  }
+	});
+  });
+  

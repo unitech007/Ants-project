@@ -6,7 +6,7 @@ var middleware = require("../middleware");
 
 //ROUTE FOR DISPLAYING THE COMMENT PAGE
 router.get("/:service/:subservice/:id/comments/new", middleware.isLoggedIn, function (req, res) {
-  Vendor.findById({ _id: req.params.id }, function (err, foundVendor) {
+  Vendor.findById({ _id: req.params.id },  (err, foundVendor)=> {
     if (err) {
       req.flash("error", err.message);
     } else {
@@ -17,7 +17,7 @@ router.get("/:service/:subservice/:id/comments/new", middleware.isLoggedIn, func
 
 //ROUTE FOR ADDING THE COMMENT
 router.post("/:service/:subservice/:id/comments/", middleware.isLoggedIn, function (req, res) {
-  Vendor.findById(req.params.id, function (err, foundVendor) {
+  Vendor.findById(req.params.id,  (err, foundVendor)=> {
     if (err) {
       req.flash("error", err.message);
       redirect("/" + req.params.service + "/" + req.params.subservice + "/" + req.params.id);
@@ -44,12 +44,12 @@ router.post("/:service/:subservice/:id/comments/", middleware.isLoggedIn, functi
 
 //ROUTE FOR COMMENT EDIT PAGE
 router.get("/:service/:subservice/:id/comments/:comment_id/edit", middleware.checkCommentOwnership, function (req, res) {
-  Vendor.findById(req.params.id, function (err, foundVendor) {
+  Vendor.findById(req.params.id,  (err, foundVendor)=> {
     if (err) {
       req.flash("error", err.message);
       redirect("/" + req.params.service + "/" + req.params.subservice + "/" + req.params.id);
     } else {
-      Comment.findById(req.params.comment_id, function (err, foundComment) {
+      Comment.findById(req.params.comment_id,  (err, foundComment)=> {
         if (err) {
           req.flash("error", err.message);
           res.redirect("back");
@@ -63,7 +63,7 @@ router.get("/:service/:subservice/:id/comments/:comment_id/edit", middleware.che
 
 //ROUTE FOR UPDATING THE COMMENT
 router.put("/:service/:subservice/:id/comments/:comment_id", middleware.checkCommentOwnership, function (req, res) {
-  Comment.findByIdAndUpdate(req.params.comment_id, req.body.comment, function (err, updatedComment) {
+  Comment.findByIdAndUpdate(req.params.comment_id, req.body.comment,  (err, updatedComment)=> {
     if (err) {
       req.flash("error", err.message);
       res.redirect("back");
@@ -76,7 +76,7 @@ router.put("/:service/:subservice/:id/comments/:comment_id", middleware.checkCom
 
 //ROUTE FOR DESTROYING THE COMMENT
 router.delete("/:service/:subservice/:id/comments/:comment_id", middleware.checkCommentOwnership, function (req, res) {
-  Comment.findByIdAndRemove(req.params.comment_id, function (err) {
+  Comment.findByIdAndRemove(req.params.comment_id,  (err)=> {
     if (err) {
       req.flash("error", err.message);
       res.redirect("/" + req.params.service + "/" + req.params.subservice + "/" + req.params.id);

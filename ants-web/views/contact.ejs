@@ -1,8 +1,7 @@
 <% include partials/header %>
 
-<meta name="description"
-	content="Ants: Contact Us: We would love to talk to you and explore ways in which Ants could add value to your life.">
-<title>Ants: Contact Us</title>
+<meta name="description" content="<%= __('common.ContactMetaDescription') %>">
+<title><%= __('common.ContactTitle') %></title>
 <link rel="stylesheet" href="/stylesheets/contact.css" />
 
 <% include partials/navbar %>
@@ -10,47 +9,44 @@
 <div class="container contact-container text-center">
 	<section class="jumbotron cover-container">
 		<div class="container">
-			<h1>Let us know what's on your mind</h1>
-			<p>We would love to hear from you!</p>
+			<h1><%= __('common.LetUsKnow') %></h1>
+			<p><%= __('common.WeLoveToHear') %></p>
 		</div>
 	</section>
 	
-	<div class=" jumbotron cf-wrapper-container">
+	<div class="jumbotron cf-wrapper-container">
 		<div class="container">
 			<header class="cf-header">
-				<h1>HELLO, ANTS?</h1>
+				<h1><%= __('common.HelloAnts') %></h1>
 			</header>
 			<div class="cf-note">
-				We guarantee 100% security of your information.
-				Your email won&#39;t be used for spamming.
+				<%= __('common.ContactNote') %>
 			</div>
 			<div class="cf-details">
 				<form method="post" action="/enquiry" class="contact-form">
 					<div class="cf-entry">
 						<span class="cf-icon"><i class="fas fa-user fa-2x"></i></span>
-						<input name="user_name" class="cf-textfield" type="text" placeholder="Full Name"
-							required></input>
+						<input name="user_name" class="cf-textfield" type="text" placeholder="<%= __('common.FullName') %>" required></input>
 					</div>
 					<div class="cf-entry">
 						<span class="cf-icon"><i class="fas fa-envelope fa-2x"></i></span>
-						<input name="user_email" class="cf-textfield" type="text" placeholder="Email" required>
+						<input name="user_email" class="cf-textfield" type="text" placeholder="<%= __('common.Email') %>" required>
 					</div>
 					<div class="cf-entry">
 						<span class="cf-icon"><i class="fas fa-mobile fa-2x"></i></span>
-						<input name="user_mobile" class="cf-textfield" type="text" placeholder="Mobile" required>
+						<input name="user_mobile" class="cf-textfield" type="text" placeholder="<%= __('common.Mobile') %>" required>
 					</div>
 					<div class="cf-entry">
 						<span class="cf-icon"><i class="fas fa-info fa-2x"></i></span>
-						<input name="user_subject" class="cf-textfield" type="text" placeholder="Subject" required>
+						<input name="user_subject" class="cf-textfield" type="text" placeholder="<%= __('common.Subject') %>" required>
 					</div>
 					<div class="cf-entry">
 						<span class="cf-icon"><i class="fa fa-comment fa-2x"></i></span>
-						<textarea name="user_message" class="cf-textfield" name="comments" rows="8"
-							placeholder="Message" required></textarea>
+						<textarea name="user_message" class="cf-textfield" name="comments" rows="8" placeholder="<%= __('common.Message') %>" required></textarea>
 					</div>
 					<div class="cf-entry-send">
 						<button class="btn btn-outline-light btn-lg" type="submit">
-							<i class="far fa-paper-plane"></i>Send
+							<i class="far fa-paper-plane"></i><%= __('common.Send') %>
 						</button>
 					</div>
 				</form>
@@ -63,24 +59,23 @@
 			<div class="row">
 				<div class="get-in-touch-column col-lg-4 col-md-4 col-sm-12 col-xs-12">
 					<span class="icon-background"><i class="fas fa-map-marker-alt fa-3x"></i></span>
-					<h1>Address</h1>
-					<p> Univarsal Tech,Muslim area opp,Natham,Dindigul-624401 </p>
+					<h1><%= __('common.Address') %></h1>
+					<p><%= __('common.AddressDetails') %></p>
 				</div>
 				<div class="get-in-touch-column col-lg-4 col-md-4 col-sm-12 col-xs-12">
 					<span class="icon-background"><i class="fas fa-phone fa-3x"></i></span>
-					<h1>On-call Support</h1>
-					<p>(+91) 9741163733</p>
-					<p>(+91) 6383225880</p>
-					<p>(+91) 6380584614</p>
-					<p>(+91) 9787943273</p>
+					<h1><%= __('common.OnCallSupport') %></h1>
+					<p><%= __('common.PhoneNumber1') %></p>
+					<p><%= __('common.PhoneNumber2') %></p>
+					<p><%= __('common.PhoneNumber3') %></p>
+					<p><%= __('common.PhoneNumber4') %></p>
 				</div>
 				<div class="get-in-touch-column col-lg-4 col-md-4 col-sm-12 col-xs-12">
 					<span class="icon-background"><i class="fas fa-envelope fa-3x"></i></span>
-					<h1>Email</h1>
-					<p>email-no-1</p>
-					<a role="button" rel="external" style="background: #3C88C2; margin-top: 8px"
-						class="btn btn-sm btn-primary" href="mailto:email-no-1">
-						<i class="fa fa-envelope"></i> Email Us:mailto:universaltechnologiestntm@gmail.com</a>
+					<h1><%= __('common.Email') %></h1>
+					<p><%= __('common.EmailName') %></p>
+					<a role="button" rel="external" style="background: #3C88C2; margin-top: 8px" class="btn btn-sm btn-primary" href="mailto:<%= __('common.EmailAddress') %>">
+						<i class="fa fa-envelope"></i>Email Us:<br>universaltechnologiestntm@gmail.com</a>
 				</div>
 			</div>
 		</div>
