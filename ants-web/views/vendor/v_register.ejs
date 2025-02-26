@@ -1,41 +1,39 @@
 <% include ../partials/header %>
 
 <meta name="description"
-	content="Ants: Vendor Registeration: Vendor registeration page. Register as vendor and expand your business by getting called from customers near you who are looking for local services.">
-<title>Ants: Vendor Registeration</title>
+	content="<%= __('common.vendor_registration_description') %>">
+<title><%= __('common.vendor_registration_title') %></title>
 <link rel="stylesheet" href="/stylesheets/form.css" />
 
 <% include ../partials/navbar %>
 
 <div class="container form-content">
-	<h1 class="text-center">Register as Vendor</h1>
+	<h1 class="text-center"><%= __('common.register_as_vendor') %></h1>
 	<div class="form-container">
 		<form action="/vendor/register" method="POST" enctype="multipart/form-data">
 			<div class="form-group">
-				<label for="image">Enter Your Image</label>
+				<label for="image"><%= __('common.enter_your_image') %></label>
 				<input type="file" id="image" name="image" accept="image/*" required autofocus>
 			</div>
 			<div class="form-group">
-				<input class="form-control" type="text" maxlength="30" name="fname" placeholder="First Name" required>
+				<input class="form-control" type="text" maxlength="30" name="fname" value="<%= fname || '' %>" placeholder="<%= __('common.vfirst_name_placeholder') %>" required>
 			</div>
 			<div class="form-group">
-				<input class="form-control" type="text" maxlength="30" name="lname" placeholder="Last Name" required>
+				<input class="form-control" type="text" maxlength="30" name="lname" value="<%= lname || '' %>" placeholder="<%= __('common.vlast_name_placeholder') %>" required>
 			</div>
 			<div class="form-group">
-				<input class="form-control" type="text" maxlength="35" name="username" placeholder="Username" required>
+				<input class="form-control" type="text" maxlength="35" name="username" value="<%= username || '' %>" placeholder="<%= __('common.vusername_placeholder') %>" required>
 			</div>
 			<div class="form-group">
 				<div class="row">
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 						<div class="form-group">
-							<input class="form-control" type="email" maxlength="254" name="email" placeholder="Email"
-								required>
+							<input class="form-control" type="email" maxlength="254" name="email" value="<%= email || '' %>" placeholder="<%= __('common.vemail_placeholder') %>" required>
 						</div>
 					</div>
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 						<div class="form-group">
-							<input class="form-control" type="email" maxlength="254" name="confirmemail"
-								placeholder="Confirm Email" required>
+							<input class="form-control" type="email" maxlength="254" name="confirmemail" value="<%= confirmemail || '' %>" placeholder="<%= __('common.confirm_email_placeholder') %>" required>
 						</div>
 					</div>
 				</div>
@@ -44,33 +42,29 @@
 				<div class="row">
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 						<div class="form-group">
-							<input class="form-control" type="password" minlength="8" maxlength="30" name="password"
-								placeholder="Password" required>
+							<input class="form-control" type="password" minlength="8" maxlength="30" name="password" placeholder="<%= __('common.password_placeholder') %>" required>
 						</div>
 					</div>
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 						<div class="form-group">
-							<input class="form-control" type="password" minlength="8" maxlength="30"
-								name="confirmpassword" placeholder="Confirm Password" required>
+							<input class="form-control" type="password" minlength="8" maxlength="30" name="confirmpassword" placeholder="<%= __('common.confirm_password_placeholder') %>" required>
 						</div>
 					</div>
 				</div>
 			</div>
 			<div class="form-group">
-				<input class="form-control" type="text" maxlength="80" name="address" placeholder="Address" required>
+				<input class="form-control" type="text" maxlength="80" name="address" value="<%= address || '' %>" placeholder="<%= __('common.vraddress_placeholder') %>" required>
 			</div>
 			<div class="form-group">
 				<div class="row">
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 						<div class="form-group">
-							<input class="form-control" type="text" maxlength="30" name="area" placeholder="Area"
-								required>
+							<input class="form-control" type="text" maxlength="30" name="area" value="<%= area || '' %>" placeholder="<%= __('common.vrarea_placeholder') %>" required>
 						</div>
 					</div>
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 						<div class="form-group">
-							<input class="form-control" type="text" maxlength="30" name="city" placeholder="City"
-								required>
+							<input class="form-control" type="text" maxlength="30" name="city" value="<%= city || '' %>" placeholder="<%= __('common.vrcity_placeholder') %>" required>
 						</div>
 					</div>
 				</div>
@@ -79,62 +73,68 @@
 				<div class="row">
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 						<div class="form-group">
-							<input class="form-control" type="text" maxlength="30" name="state" placeholder="State"
-								required>
+							<input class="form-control" type="text" maxlength="30" name="state" value="<%= state || '' %>" placeholder="<%= __('common.vrstate_placeholder') %>" required>
 						</div>
 					</div>
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 						<div class="form-group">
-							<input class="form-control" type="text" maxlength="6" name="pincode" placeholder="Pincode"
-								required>
+							<input class="form-control" type="text" maxlength="6" name="pincode" value="<%= pincode || '' %>" placeholder="<%= __('common.vrpincode_placeholder') %>" required>
 						</div>
 					</div>
 				</div>
 			</div>
 			<div class="form-group">
-				<input class="form-control" type="text" maxlength="10" name="mobile" placeholder="Mobile Number"
-					required>
+				<input class="form-control" type="text" maxlength="10" name="mobile" value="<%= mobile || '' %>" placeholder="<%= __('common.mobile_number_placeholder') %>" required>
 			</div>
+			<!-- Service Field -->
 			<div class="form-group">
 				<div class="row">
-					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
-						<div class="form-group">
-							<select class="form-control" name="service" id="service" required>
-								<option value="">Service</option>
-								<option value="beauty">Beauty</option>
-								<option value="appliance_repair">Appliance Repair</option>
-								<option value="home_cleaning_repair">Home Cleaning And Repair</option>
-								<option value="home_made_food">Home Made Food</option>
-							</select>
-						</div>
+				  <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+					<div class="form-group">
+					  <select class="form-control" name="service" id="service"  required>
+						<option value=""><%= __('common.service_placeholder') %></option>
+						<% services.forEach(function(service) { %>
+						  <option value="<%= service._id %>" <%= service._id == service ? 'selected' : '' %>><%= __('common.' + service.keyname) %></option>
+						<% }) %>
+					  </select>
 					</div>
-					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
-						<div class="form-group">
-							<select class="form-control" name="subservice" id="subService" required>
-								<option value="">Sub Service</option>
-							</select>
-						</div>
+				  </div>
+		
+				  <!-- Subservice Field -->
+				  <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+					<div class="form-group">
+					  <select class="form-control" name="subservice" id="subService" required>
+						<option value=""><%= __('common.subservice_placeholder') %></option>
+						<!-- <% subservices.forEach(function(subservice) { %>
+						  <option value="<%= subservice._id %>" <%= subservice._id == subservice ? 'selected' : '' %>><%= subservice.name %></option>
+						<% }) %> -->
+					  </select>
 					</div>
+				  </div>
 				</div>
+			<!-- Description Field -->
+			<div class="form-group">
+				<textarea
+					class="form-control"
+					name="description"
+					placeholder="<%= __('common.describe_your_work_placeholder') %>"
+					rows="10"
+					minlength="200"
+					maxlength="1500"
+					required
+				><%= description || '' %></textarea>
 			</div>
 			<div class="form-group">
-				<textarea class="form-control" name="description"
-					placeholder="Describe About Your Work Here. Remember, Customer Will Judge You Based On This"
-					rows="10" minlength="500" maxlength="1500"></textarea>
+				<input class="form-control" type="number" name="experience" value="<%= experience || '' %>" placeholder="<%= __('common.vrexperience_placeholder') %>" min="0" max="80" required>
 			</div>
 			<div class="form-group">
-				<input class="form-control" type="number" name="experience" placeholder="Years Of Experience" min="0"
-					max="80" required>
+				<input class="form-control" type="number" name="visitCharge" value="<%= visitCharge || '' %>" placeholder="<%= __('common.vrvisit_charge_placeholder') %>" min="0" max="1000" required>
 			</div>
 			<div class="form-group">
-				<input class="form-control" type="number" name="visitCharge" placeholder="Home Visit Charge" min="0"
-					max="1000" required>
-			</div>
-			<div class="form-group">
-				<button class="btn btn-lg btn-primary btn-block">Register</button>
+				<button class="btn btn-lg btn-primary btn-block"><%= __('common.register_button') %></button>
 			</div>
 		</form>
-		<p>Already have an account? <a href="/vendor/login">Login!</a>
+		<p><%= __('common.already_have_account') %> <a href="/vendor/login"><%= __('common.login_here') %></a></p>
 	</div>
 </div>
 <script type="text/javascript" src="/scripts/select_sub_service.js"></script>

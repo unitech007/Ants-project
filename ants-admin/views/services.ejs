@@ -8,61 +8,41 @@
 <div class="container">
     <header class="jumbotron">
         <div class="container">
-            <h1>Welcome to Ants</h1>
-            <p>No Work Is Small We Serve Them All</p>
+            <h1><%= __('common.WelcomeToAnts') %></h1>
             <% if(!currentUser){ %>
-            <div><a class="btn btn-outline-light btn-md" href="/admin/login">LOGIN AS ADMIN</a></div>
-            <div><a class="btn btn-outline-light btn-md" href="/admin/register">Register AS ADMIN</a></div>
+            <div class="float-left">
+                <a class="btn btn-outline-light btn-md" href="/admin/login"><%= __('common.LOGINASADMIN') %></a></div>
+            <div><a class="btn btn-outline-light btn-md" href="/admin/register"><%= __('common.RegisterASADMIN') %></a></div>
+            <% } else { %>
+                <p><%= __('common.ServicesLandingSlogan') %></p>
             <% } %>
         </div>
     </header>
 
     <div class="row text-center services-container">
-        <div class="col-lg-3 col-md-6 col-sm-6  mb-3">
-            <div class="img-thumbnail">
-                <img class="img-fluid" src="../assets/images/services/beauty.jpg" />
-                <div class="caption">
-                    <h4>Beauty</h4>
+        <% if (services && services.length > 0) { %>
+            <% services.forEach(service => { %>
+                <div class="col-lg-3 col-md-6 col-sm-6 margin-bottom-16">
+                    <div class="img-thumbnail">
+                        <!-- Dynamically display a placeholder image -->
+                        <img class="img-fluid" src="<%= service.images || '/path/to/placeholder.jpg' %>" alt="<%= service.keyname %>">
+
+                        <div class="caption">
+                            <!-- Display service name using keyname for multilingual support -->
+                            <h4><%= __('common.' + service.keyname) %></h4>
+                        </div>
+                        <p>
+                            <!-- Generate link using service name or a unique identifier -->
+                            <a href="/services/<%= service._id %>" class="btn btn-outline-info"><%= __('common.MoreInfo') %></a>
+                        </p>
+                    </div>
                 </div>
-                <p>
-                    <a href="/services/beauty" class="btn btn-outline-primary">More Info</a>
-                </p>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
-            <div class="img-thumbnail">
-                <img class="img-fluid" src="../assets/images/services/appliance_repair.jpg" />
-                <div class="caption">
-                    <h4>Appliance Repair</h4>
-                </div>
-                <p>
-                    <a href="/services/appliance_repair" class="btn btn-outline-primary">More Info</a>
-                </p>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
-            <div class="img-thumbnail">
-                <img class="img-fluid" src="../assets/images/services/home_cleaning_repair.jpg" />
-                <div class="caption">
-                    <h4>Home Cleaning & Repair</h4>
-                </div>
-                <p>
-                    <a href="/services/home_cleaning_repair" class="btn btn-outline-primary">More Info</a>
-                </p>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
-            <div class="img-thumbnail">
-                <img class="img-fluid" src="../assets/images/services/cakes_chocolates.jpg" />
-                <div class="caption">
-                    <h4>Home Made Food</h4>
-                </div>
-                <p>
-                    <a href="/services/home_made_food" class="btn btn-outline-primary">More Info</a>
-                </p>
-            </div>
-        </div>
+            <% }); %>
+        <% } else { %>
+            <p class="text-center"><%= __('common.NoServicesAvailable') %></p>
+        <% } %>
     </div>
 </div>
+
 
 <% include partials/footer %>

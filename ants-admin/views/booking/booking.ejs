@@ -1,0 +1,176 @@
+<% include ../partials/header %>
+
+<meta name="description" content="<%= __('common.booking_meta_description') %>">
+<link rel="stylesheet" href="/stylesheets/booking.css" />
+<title><%= __('common.booking_title') %></title>
+
+<% include ../partials/navbar %>
+
+<div class="container">
+    <header class="jumbotron">
+        <div class="container">
+            <h1><%= __('common.booking_header')%>- <%= __('common.' + service.keyname) %> - <%= __('common.' + subservice.keyname) %> </h1>
+            <p><%= __('common.booking_subheader')%> <%= __('common.' + subservice.keyname) %></p>
+        </div>
+    </header>
+
+    <!-- Booking Form -->
+    <form id="booking-form" action="/booking" method="POST">
+        <!-- Customer Dropdown -->
+        <div class="form-group">
+            <label for="customer">Select Customer</label>
+            <select id="customer" name="customerId" class="form-control">
+                <option value="" disabled selected>Select a Customer</option>
+                <% customers.forEach(function(customer) { %>
+                    <option value="<%= customer._id %>"><%= customer.username %> </option>
+                <% }); %>
+            </select>
+        </div>
+        <!-- Date Input -->
+        <div class="form-group">
+            <label for="date"><%= __('common.enter_date_label') %></label>
+            <input type="date" id="date" name="date" class="form-control" required min="<%= new Date().toISOString().split('T')[0] %>">
+        </div>
+
+        <!-- Time Input -->
+        <div class="form-group">
+            <label for="time"><%= __('common.enter_time_label') %></label>
+            <input type="time" id="time" name="time" class="form-control" required>
+        </div>
+
+        <!-- Vendor List Dropdown -->
+        <div class="form-group">
+            <label for="vendor"><%= __('common.select_vendor_label') %></label>
+            <div id="vendor-list">
+                <select id="vendor" name="vendor[id]" class="form-control" required>
+                    <option value="" disabled selected><%= __('common.select_vendor_placeholder') %></option>
+                    <% if (vendor && vendor.length > 0) { %>
+                        <% vendor.forEach(function(vendor) { %>
+                            <option value="<%= vendor._id %>" 
+                                    data-visit-charge="<%= vendor.visitCharge %>" 
+                                    data-experience="<%= vendor.experience %>">
+                                    <%= vendor.username %> - <%= vendor.experience %> - ₹<%= vendor.visitCharge %>
+                            </option>
+                        <% }); %>
+                    <% } else { %>
+                        <option value="" disabled><%= __('common.no_vendors_available') %></option>
+                    <% } %>
+                </select>
+            </div>
+        </div>
+
+        <!-- Work Type Dropdown -->
+        <!-- Worktype List Dropdown -->
+    <div class="form-group">
+        <label for="worktype"><%= __('common.select_worktype_label') %></label>
+        <select id="worktype" name="worktype" class="form-control" required>
+            <option value="" disabled selected><%= __('common.select_worktype_placeholder') %></option>
+            
+        </select>
+    </div>
+        
+
+
+        <!-- Hidden Fields for Vendor Details -->
+        <input type="hidden" id="vendorVisitCharge" name="vendor[visitCharge]">
+        <input type="hidden" id="vendorExperience" name="vendor[experience]">
+
+        <!-- Hidden Fields for Worktype Details -->
+        <input type="hidden" id="worktypePrices" name="worktypePrices">
+        <input type="hidden" id="worktypeId" name="worktypename">
+
+
+        <!-- Hidden Fields for Service and Subservice -->
+        <input type="hidden" name="serviceName" value="<%= serviceName %>">
+        <input type="hidden" name="subServiceName" value="<%= subServiceName %>">
+
+        <!-- Book Now Button -->
+        <button type="submit" class="btn btn-primary"><%= __('common.book_now_button') %></button>
+    </form>
+</div>
+
+<script>
+    document.getElementById("customer").addEventListener("change", function() {
+        let customerSelected = this.value !== "";
+        document.getElementById("date").disabled = !customerSelected;
+        document.getElementById("time").disabled = !customerSelected;
+        document.getElementById("vendor").disabled = !customerSelected;
+        document.getElementById("worktype").disabled = !customerSelected;
+        document.getElementById("book-now-btn").disabled = !customerSelected;
+
+        if (!customerSelected) {
+            alert("Please select a customer before proceeding.");
+        }
+    });
+    
+   document.getElementById("vendor").addEventListener("change", function() {
+    let vendorId = this.value;
+    let serviceId = "<%= serviceId %>";
+    let subServiceId = "<%= subServiceId %>";
+
+    console.log("Service ID:", serviceId, "| Type:", typeof serviceId);
+    console.log("Subservice ID:", subServiceId, "| Type:", typeof subServiceId);
+    console.log("Vendor Selected:", vendorId);
+
+    let worktypeDropdown = document.getElementById("worktype");
+            worktypeDropdown.innerHTML = `<option value="" disabled selected>Select Worktype</option>`;
+
+    fetch(`/booking/getWorktypes?serviceId=${serviceId}&subServiceId=${subServiceId}&vendorId=${vendorId}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Worktypes Data Received:", data);
+
+             if (data.worktypes && data.worktypes.length > 0) {
+                data.worktypes.forEach(worktype => {
+                    console.log("Adding Worktype:", worktype.name, "Price:", worktype.price);
+
+                    let option = document.createElement("option");
+                    option.value = worktype._id;
+                    option.dataset.price = worktype.price;
+                    option.textContent = `${worktype.name} - ₹${worktype.price}`;
+                    worktypeDropdown.appendChild(option);
+                });
+            } else {
+                let noOption = document.createElement("option");
+                noOption.textContent = "No worktypes available";
+                worktypeDropdown.appendChild(noOption);
+            }
+        })
+        .catch(error => console.error("Error updating worktypes:", error));
+});
+     // Populate hidden fields when a worktype is selected
+    document.getElementById('worktype').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        console.log("Selected worktype:", selectedOption.value, selectedOption.textContent);
+        document.getElementById('worktypePrices').value = selectedOption.dataset.price;
+        document.getElementById('worktypeId').value = selectedOption.value;
+    });
+
+    // Populate hidden fields when a vendor is selected
+    document.getElementById('vendor').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        document.getElementById('vendorVisitCharge').value = selectedOption.dataset.visitCharge;
+        document.getElementById('vendorExperience').value = selectedOption.dataset.experience;
+    });
+
+
+    // Restrict the time input to only allow future times if the selected date is today
+    const dateInput = document.getElementById('date');
+    const timeInput = document.getElementById('time');
+
+    dateInput.addEventListener('change', function () {
+        const today = new Date().toISOString().split('T')[0];
+        const selectedDate = dateInput.value;
+
+        if (selectedDate === today) {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            timeInput.min = `${hours}:${minutes}`;
+        } else {
+            timeInput.removeAttribute('min');
+        }
+    });
+</script>
+
+<% include ../partials/footer %>

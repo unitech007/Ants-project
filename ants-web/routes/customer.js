@@ -4,11 +4,13 @@ var router = express.Router();
 router.use(expressValidator());
 var passport = require("passport");
 var Customer = require("../models/customer");
+const Address = require("../models/address");
+const EmailTemplate = require('../models/emailtemplate'); 
 var middleware = require("../middleware");
 var async = require("async");
-var nodemailer = require("nodemailer");
 var crypto = require("crypto");
 const bcrypt = require('bcryptjs');
+const emailcontrollers = require('../controllers/emailcontrollers');
 
 // ROUTE FOR THE CUSTOMER LOGIN PAGE
 router.get("/customer/login", function (req, res) {
@@ -16,29 +18,60 @@ router.get("/customer/login", function (req, res) {
 });
 
 // ROUTE FOR CUSTOMER LOGIN
-router.post("/customer/login", passport.authenticate("customer", {
-   successRedirect: "/services",
-   failureRedirect: "/customer/login",
-   failureFlash: "Incorrect username or Password",
-   successFlash: "Welcome to Ants!"
-}), function (req, res) {
+router.post("/customer/login", function (req, res, next) {
+   // Trim spaces from the username and password
+   req.body.username = req.body.username.trim();
+   req.body.password = req.body.password.trim();
+
+   // Proceed with Passport authentication
+   passport.authenticate("customer", {
+       successRedirect: "/services",
+       failureRedirect: "/customer/login",
+       failureFlash: "Incorrect username or Password",
+       successFlash: "Welcome to Ants!"
+   })(req, res, next);
+}, function (req, res) {
    req.session.username = req.body.username; // Set the session variable--new line
 });
 
+
 // ROUTE FOR THE CUSTOMER REGISTRATION PAGE
 router.get("/customer/register", function (req, res) {
-   res.render("customer/c_register");
+   res.render("customer/c_register", {
+      error: null,
+      fname: "",
+      lname: "",
+      username: "",
+      email: "",
+      confirmemail: "",
+      address: "",
+      area: "",
+      city: "",
+      state: "",
+      pincode: "",
+      mobile: "",
+      type: ""
+   });
 });
 
 // ROUTE FOR CUSTOMER REGISTRATION
-router.post("/customer/register", function (req, res) {
-   var fname = req.body.fname;
-   var lname = req.body.lname;
-   var username = req.body.username;
-   var email = req.body.email;
-   var confirmemail = req.body.confirmemail;
-   var password = req.body.password;
-   var confirmpassword = req.body.confirmpassword;
+router.post("/customer/register", async function (req, res) {
+   var {
+      fname,
+      lname,
+      username,
+      email,
+      confirmemail,
+      password,
+      confirmpassword,
+      address,
+      area,
+      city,
+      state,
+      pincode,
+      mobile,
+      type,
+   } = req.body;
 
    req.checkBody("fname", "First Name can only have letters").isAlpha();
    req.checkBody("lname", "Last Name can only have letters").isAlpha();
@@ -47,35 +80,93 @@ router.post("/customer/register", function (req, res) {
    req.checkBody("confirmemail", "Emails do not match").equals(req.body.email);
    req.checkBody("password", "Password must be 8 - 20 characters long with one uppercase letter, one lowercase letter, and one number").matches("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,30}$");
    req.checkBody("confirmpassword", "Passwords do not match").equals(req.body.password);
+   req.checkBody("address", "Address is not valid").matches(/^[a-zA-Z0-9\s,./-]+$/, "i");
+   req.checkBody("area", "Area is not valid").matches(/^[a-zA-Z\s]+$/, "i");
+   req.checkBody("city", "City is not valid").matches(/^[a-zA-Z\s]+$/, "i");
+   req.checkBody("state", "State is not valid").matches(/^[a-zA-Z\s]+$/, "i");
+   req.checkBody("pincode", "Pincode is not valid").isNumeric({ no_symbols: true });
+   req.checkBody("mobile", "Mobile number can only have numbers").isNumeric({ no_symbols: true });
+   req.checkBody("mobile", "Mobile number is not valid").matches("^[6-9][0-9]{9}$");
+   req.checkBody("type", "Please select a valid type").notEmpty();
 
    var errors = req.validationErrors();
    if (errors) {
-      res.render("customer/c_register", {
-         error: errors[0].msg
+      // Pass the values back to the form
+      return res.render("customer/c_register", {
+         error: errors[0].msg,
+         fname,
+         lname,
+         username,
+         email,
+         confirmemail,
+         address,
+         area,
+         city,
+         state,
+         pincode,
+         mobile,
+         type,
       });
-   } else {
+   }
+
+   try {
+      // Create a new Customer
       var newCustomer = new Customer({
          isCustomer: true,
-         fname: fname,
-         lname: lname,
-         username: username,
-         email: email
+         fname,
+         lname,
+         username,
+         email,
       });
-      
-      // Directly use the plain password without hashing
-      Customer.register(newCustomer, password, function (err, customer) {
-         if (err) {
-            req.flash("error", err.message);
-            return res.render("customer/c_register");
-         }
-         passport.authenticate("customer")(req, res, function () {
-            req.flash("success", "Successfully Signed Up! Nice to meet you " + req.body.username);
-            res.redirect("/services");
-         });
+
+      // Save the Customer and hash the password
+      const customer = await Customer.register(newCustomer, password);
+
+      // Create a new Address
+      const newAddress = new Address({
+         customerId: customer._id,
+         address,
+         area,
+         city,
+         state,
+         pincode,
+         mobile,
+         type,
+         isDefault: true, // You can set this as default
+      });
+
+      // Save the Address
+      const savedAddress = await newAddress.save();
+
+      // Link the Address to the Customer
+      customer.addresses.push(savedAddress._id);
+      await customer.save();
+
+      // Authenticate and redirect
+      passport.authenticate("customer")(req, res, function () {
+         req.flash("success", "Successfully Signed Up! Nice to meet you " + req.body.username);
+         res.redirect("/services");
+      });
+   } catch (err) {
+      console.error(err);
+      req.flash("error", err.message);
+      return res.render("customer/c_register", {
+         error: "Registration failed. Please try again.",
+         fname,
+         lname,
+         username,
+         email,
+         confirmemail,
+         address,
+         area,
+         city,
+         state,
+         pincode,
+         mobile,
+         type,
       });
    }
 });
-
 
 // ROUTE FOR CUSTOMER EDIT PAGE
 router.get("/customer/:id/edit", middleware.isLoggedIn, function (req, res) {
@@ -105,7 +196,7 @@ router.put("/customer/:id", middleware.isLoggedIn, function (req, res) {
          lname: lname,
          email: email
       };
-      Customer.findByIdAndUpdate(req.params.id, customer, function (err, updatedCustomer) {
+      Customer.findByIdAndUpdate(req.params.id, customer,  (err, updatedCustomer)=> {
          if (err) {
             req.flash("error", err.message);
             res.redirect("/customer/" + req.params.id + "/edit");
@@ -117,145 +208,264 @@ router.put("/customer/:id", middleware.isLoggedIn, function (req, res) {
    }
 });
 
+
+
 // ROUTE FOR CUSTOMER FORGET PASSWORD PAGE
-router.get("/customer/forgot", function (req, res) {
+router.get("/customer/forgot", (req, res) => {
    res.render("customer/c_forgotpassword");
 });
 
-// ROUTE FOR CUSTOMER FORGET PASSWORD
-router.post("/customer/forgot", function (req, res, next) {
-   async.waterfall([
-      function (done) {
-         crypto.randomBytes(20, function (err, buf) {
-            var token = buf.toString("hex");
-            done(err, token);
+// POST route for customer forgot password
+router.post("/customer/forgot", async (req, res, next) => {
+   try {
+      // Generate token
+      const token = await new Promise((resolve, reject) => {
+         crypto.randomBytes(20, (err, buf) => {
+            if (err) reject(err);
+            resolve(buf.toString("hex"));
          });
-      },
-      function (token, done) {
-         Customer.findOne({ email: req.body.email }, function (err, user) {
-            if (!user) {
-               req.flash("error", "No account with that email address exists.");
-               return res.redirect("/customer/forgot");
-            }
+      });
 
-            user.resetPasswordToken = token;
-            user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-
-            user.save(function (err) {
-               done(err, token, user);
-            });
-         });
-      },
-      function (token, user, done) {
-         var smtpTransport = nodemailer.createTransport({
-            service: "Gmail",
-            auth: {
-               user: process.env.GMAIL_USER,
-               pass: process.env.GMAILPW
-            }
-         });
-         var mailOptions = {
-            to: user.email,
-            from: process.env.GMAIL_USER,
-            subject: "Ants Password Reset",
-            text: "You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n" +
-               "Please click on the following link, or paste this into your browser to complete the process:\n\n" +
-               "http://" + req.headers.host + "/customer/reset/" + token + "\n\n" +
-               "If you did not request this, please ignore this email and your password will remain unchanged.\n"
-         };
-         smtpTransport.sendMail(mailOptions, function (err) {
-            req.flash("success", "An e-mail has been sent to " + user.email + " with further instructions.");
-            done(err, "done");
-         });
+      // Find customer by email
+      const user = await Customer.findOne({ email: req.body.email });
+      if (!user) {
+         req.flash("error", "No account with that email address exists.");
+         return res.redirect("/customer/forgot");
       }
-   ], function (err) {
-      if (err) return next(err);
+
+      user.resetPasswordToken = token;
+      user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+      // Save the updated user
+      await user.save();
+
+      // Prepare the reset link
+      const resetLink = `http://${req.headers.host}/customer/reset/${token}`;
+
+      // Fetch email template for customer reset email
+const userTemplate = await EmailTemplate.findOne({ name: 'user_password_reset' });
+const userMailOptions = {
+    to: user.email, // User's email
+    placeholderData: {
+        resetLink: resetLink
+    }
+};
+await emailcontrollers.sendEmail('user_password_reset', user.email, userMailOptions.placeholderData);
+
+// Fetch email template for admin notification email
+const adminTemplate = await EmailTemplate.findOne({ name: 'admin_password_reset' });
+const adminMailOptions = {
+    to: process.env.ADMIN_EMAIL, // Admin's email from environment variables
+    placeholderData: {
+        email: user.email
+    }
+};
+await emailcontrollers.sendEmail('admin_password_reset', process.env.ADMIN_EMAIL, adminMailOptions.placeholderData);
+
+      // Success response
+      req.flash("success", "An e-mail has been sent to " + user.email + " with further instructions.");
       res.redirect("/customer/forgot");
-   });
+   } catch (err) {
+      return next(err);
+   }
 });
 
-// ROUTE FOR CUSTOMER RESET PASSWORD PAGE
-router.get("/customer/reset/:token", function (req, res) {
-   Customer.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function (err, user) {
+// ROUTE FOR CUSTOMER RESET PASSWORD PAGE 
+router.get("/customer/reset/:token", async (req, res) => {
+   try {
+      // Find user by reset token and check expiration time
+      const user = await Customer.findOne({
+         resetPasswordToken: req.params.token,
+         resetPasswordExpires: { $gt: Date.now() }
+      });
+
       if (!user) {
          req.flash("error", "Password reset token is invalid or has expired.");
          return res.redirect("/customer/forgot");
       }
+
+      // Render reset password page with the token
       res.render("customer/c_resetpassword", { token: req.params.token });
-   });
+   } catch (err) {
+      req.flash("error", "Something went wrong.");
+      res.redirect("/customer/forgot");
+   }
 });
 
 // ROUTE FOR CUSTOMER RESET PASSWORD
-router.post("/customer/reset/:token", function (req, res) {
-   async.waterfall([
-      function (done) {
-         Customer.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function (err, user) {
-            if (!user) {
-               req.flash("error", "Password reset token is invalid or has expired.");
-               return res.redirect("back");
-            }
-            if (req.body.password === req.body.confirm) {
-               // Hash the password before saving
-               const hashedPassword = bcrypt.hashSync(req.body.password, 10);
-               user.password = hashedPassword;
-               
-               user.resetPasswordToken = undefined;
-               user.resetPasswordExpires = undefined;
+router.post("/customer/reset/:token", async (req, res) => {
+   try {
+       // Find the user by reset token and check if the token has expired
+       const user = await Customer.findOne({
+           resetPasswordToken: req.params.token,
+           resetPasswordExpires: { $gt: Date.now() },
+       });
 
-               user.save(function (err) {
-                  req.logIn(user, function (err) {
-                     done(err, user);
-                  });
-               });
-            } else {
-               req.flash("error", "Passwords do not match.");
-               return res.redirect("back");
-            }
-         });
-      },
-      function (user, done) {
-         var smtpTransport = nodemailer.createTransport({
-            service: "Gmail",
-            auth: {
-               user: process.env.GMAIL_USER,
-               pass: process.env.GMAILPW
-            }
-         });
-         var mailOptions = {
-            to: user.email,
-            from: process.env.GMAIL_USER,
-            subject: "Ants: Your password has been changed",
-            text: "Hello,\n\n" +
-               "This is a confirmation that the password for your account " + user.email + " has just been changed.\n"
-         };
-         smtpTransport.sendMail(mailOptions, function (err) {
-            req.flash("success", "Success! Your password has been changed.");
-            done(err);
-         });
-      }
-   ], function (err) {
-      res.redirect("/services");
-   });
+       // If no valid user is found, redirect to the forgot password page
+       if (!user) {
+           req.flash("error", "Password reset token is invalid or has expired.");
+           return res.redirect("/customer/forgot");
+       }
+
+       // Check if the passwords match
+       if (req.body.password !== req.body.confirm) {
+           req.flash("error", "Passwords do not match.");
+           return res.redirect("back");
+       }
+
+       // Use passport-local-mongoose's method to set a new password
+       await user.setPassword(req.body.password);
+
+       // Clear the reset token and expiry fields
+       user.resetPasswordToken = undefined;
+       user.resetPasswordExpires = undefined;
+       
+       // Save the updated user to the database
+       await user.save();
+
+       // Send a success message and redirect to the login page
+       req.flash("success", "Your password has been successfully updated! Please log in with your new password.");
+       res.redirect("/customer/login");
+   } catch (err) {
+       console.error("Error during password reset:", err);
+       req.flash("error", "Something went wrong. Please try again.");
+       res.redirect("back");
+   }
 });
 
-router.put('/customer/location/:id', middleware.isLoggedIn, function(req, res) {
-   var updatedLocation = {
-     area: req.body.area,
-     city: req.body.city,
-     state: req.body.state,
-     pincode: req.body.pincode
-   };
- 
-   Customer.findByIdAndUpdate(req.params.id, updatedLocation, function(err, updatedCustomer) {
-     if (err) {
-       req.flash("error", "Unable to update location");
-       return res.redirect("/customer/location/" + req.params.id);
-     } else {
-       req.flash("success", "Location updated successfully");
-       res.redirect("/services");
-     }
-   });
- });
- 
+ // ================================
+// ROUTES FOR ADDRESS MANAGEMENT
+// ================================
+
+// GET: Display all addresses for a customer
+router.get("/customer/:id/addresses", middleware.isLoggedIn, async (req, res) => {
+   try {
+       const customer = await Customer.findById(req.params.id).populate("addresses");
+       res.render("customer/manage_addresses", { customer });
+   } catch (err) {
+       req.flash("error", "Unable to fetch addresses.");
+       res.redirect("back");
+   }
+});
+
+// POST: Add a new address for a customer
+router.post("/customer/:id/addresses", middleware.isLoggedIn, async (req, res) => {
+   try {
+       const { address, area, city, state, pincode, mobile, type } = req.body;
+
+       // Create a new address
+       const newAddress = await Address.create({
+           customerId: req.params.id,
+           address,
+           area,
+           city,
+           state,
+           pincode,
+           mobile,
+           type, // Address type, e.g., "Home", "Office"
+       });
+         // Save the address
+      await newAddress.save();
+
+       // Add the new address to the customer's addresses array
+       const customer = await Customer.findById(req.params.id);
+       customer.addresses.push(newAddress._id);
+       await customer.save();
+
+       req.flash("success", "Address added successfully.");
+       res.redirect(`/customer/${req.params.id}/addresses`);
+   } catch (err) {
+       req.flash("error", "Failed to add address. Please try again.");
+       res.redirect("back");
+   }
+});
+
+// PUT: Edit an address
+router.put("/customer/:id/addresses/:addressId", middleware.isLoggedIn, async (req, res) => {
+   try {
+       const { address, area, city, state, pincode, mobile, type } = req.body;
+
+       // Update the address
+       await Address.findByIdAndUpdate(req.params.addressId, {
+           address,
+           area,
+           city,
+           state,
+           pincode,
+           mobile,
+           type,
+       });
+
+       req.flash("success", "Address updated successfully.");
+       res.redirect(`/customer/${req.params.id}/addresses`);
+   } catch (err) {
+       req.flash("error", "Failed to update address.");
+       res.redirect("back");
+   }
+});
+
+// DELETE: Delete an address
+router.delete("/customer/:id/addresses/:addressId", middleware.isLoggedIn, async (req, res) => {
+   try {
+       // Find the address being deleted
+       const addressToDelete = await Address.findById(req.params.addressId);
+
+       if (!addressToDelete) {
+           req.flash("error", "Address not found.");
+           return res.redirect("back");
+       }
+
+       // Check if the address is the default address
+       if (addressToDelete.isDefault) {
+           // Find another address for the customer
+           const otherAddress = await Address.findOne({
+               customerId: req.params.id,
+               _id: { $ne: req.params.addressId } // Exclude the current address
+           });
+
+           if (!otherAddress) {
+               req.flash("error", "Cannot delete the default address. No other address found.");
+               return res.redirect("back");
+           }
+
+           // Set the other address as default
+           otherAddress.isDefault = true;
+           await otherAddress.save();
+       }
+
+       // Delete the address
+       await Address.findByIdAndDelete(req.params.addressId);
+
+       // Remove the address from the customer's addresses array
+       const customer = await Customer.findById(req.params.id);
+       customer.addresses.pull(req.params.addressId);
+       await customer.save();
+
+       req.flash("success", "Address deleted successfully.");
+       res.redirect(`/customer/${req.params.id}/addresses`);
+   } catch (err) {
+       console.error(err);
+       req.flash("error", "Failed to delete address.");
+       res.redirect("back");
+   }
+});
+
+// PUT: Set an address as default
+router.put("/customer/:id/addresses/:addressId/default", middleware.isLoggedIn, async (req, res) => {
+   try {
+       // Reset all addresses' `isDefault` to false
+       await Address.updateMany({ customerId: req.params.id }, { isDefault: false });
+
+       // Set the selected address as default
+       await Address.findByIdAndUpdate(req.params.addressId, { isDefault: true });
+
+       req.flash("success", "Default address set successfully.");
+       res.redirect(`/customer/${req.params.id}/addresses`);
+   } catch (err) {
+       req.flash("error", "Failed to set default address.");
+       res.redirect("back");
+   }
+});
+  
 
 module.exports = router;

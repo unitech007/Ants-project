@@ -1,48 +1,52 @@
 <% include ../partials/header %>
-<title>Ants: Edit Vendor</title>
+<title><%= __('common.edit_vendor_title') %></title>
 <link rel="stylesheet" href="/stylesheets/image_style.css" />
 <link rel="stylesheet" href="/stylesheets/form.css" />
 <% include ../partials/navbar %>
 
 <div class="container form-content">
 	<div class="vendor-image-div">
-		<div class="vendor-image"><img src="<%= currentUser.image %>" alt=""></div>
+		<div class="vendor-image"><img src="<%= currentUser.image %>" alt="<%= __('vendor_image_alt') %>"></div>
 	</div>
-	<h1 class="text-center">Edit <strong><%= currentUser.username %></strong></h1>
+	<h1 class="text-center"><%= __('common.edit_profile_heading')%> <strong><%= currentUser.username %></strong></h1>
 	<div class="form-container">
 		<form action="/vendor/<%= currentUser._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
 			<div class="form-group">
-				<label for="image">Change Image</label>
+				<label for="image"><%= __('common.change_image_label') %></label>
 				<input type="file" id="image" name="image" accept="image/*" autofocus>
 			</div>
 			<div class="form-group">
-				<input class="form-control" type="text" name="fname" maxength="30" value="<%= currentUser.fname %>"
-					required>
+				<input class="form-control" type="text" name="fname" maxlength="30" value="<%= currentUser.fname %>"
+					placeholder="<%= __('common.first_name_placeholder') %>" required>
 			</div>
 			<div class="form-group">
-				<input class="form-control" type="text" name="lname" maxength="30" value="<%= currentUser.lname %>"
-					required>
+				<input class="form-control" type="text" name="lname" maxlength="30" value="<%= currentUser.lname %>"
+					placeholder="<%= __('common.last_name_placeholder') %>" required>
 			</div>
 			<div class="form-group">
-				<input class="form-control" type="text" name="email" maxength="254" value="<%= currentUser.email %>"
-					required>
+				<input class="form-control" type="text" name="username" maxlength="30" value="<%= currentUser.username %>"
+					placeholder="<%= __('common.username_placeholder') %>" required>
 			</div>
 			<div class="form-group">
-				<input class="form-control" type="text" name="address" mxlength="80" value="<%= currentUser.address %>"
-					required>
+				<input class="form-control" type="text" name="email" maxlength="254" value="<%= currentUser.email %>"
+					placeholder="<%= __('common.email_placeholder') %>" required>
+			</div>
+			<div class="form-group">
+				<input class="form-control" type="text" name="address" maxlength="80" value="<%= currentUser.address %>"
+					placeholder="<%= __('common.vaddress_placeholder') %>" required>
 			</div>
 			<div class="form-group">
 				<div class="row">
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 						<div class="form-group">
-							<input class="form-control" type="text" name="area" maxlngth="30"
-								value="<%= currentUser.area %>" required>
+							<input class="form-control" type="text" name="area" maxlength="30"
+								value="<%= currentUser.area %>" placeholder="<%= __('common.varea_placeholder') %>" required>
 						</div>
 					</div>
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 						<div class="form-group">
-							<input class="form-control" type="text" name="city" maxlngth="30"
-								value="<%= currentUser.city %>" required>
+							<input class="form-control" type="text" name="city" maxlength="30"
+								value="<%= currentUser.city %>" placeholder="<%= __('common.vcity_placeholder') %>" required>
 						</div>
 					</div>
 				</div>
@@ -51,39 +55,39 @@
 				<div class="row">
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 						<div class="form-group">
-							<input class="form-control" type="text" name="state" maxength="30"
-								value="<%= currentUser.state %>" required>
+							<input class="form-control" type="text" name="state" maxlength="30"
+								value="<%= currentUser.state %>" placeholder="<%= __('common.vstate_placeholder') %>" required>
 						</div>
 					</div>
 					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 						<div class="form-group">
-							<input class="form-control" type="text" name="pincode" mxlength="6"
-								value="<%= currentUser.pincode %>" required>
+							<input class="form-control" type="text" name="pincode" maxlength="6"
+								value="<%= currentUser.pincode %>" placeholder="<%= __('common.vpincode_placeholder') %>" required>
 						</div>
 					</div>
 				</div>
 			</div>
 			<div class="form-group">
-				<input class="form-control" type="text" name="mobile" malength="10" value="<%= currentUser.mobile %>"
-					required>
+				<input class="form-control" type="text" name="mobile" maxlength="10" value="<%= currentUser.mobile %>"
+					placeholder="<%= __('common.vmobile_placeholder') %>" required>
 			</div>
 			<div class="form-group">
 				<textarea class="form-control" name="description" rows="10" minlength="500"
-					maxlength="1500"><%= currentUser.description %></textarea>
+					maxlength="1500" placeholder="<%= __('common.description_placeholder') %>"><%= currentUser.description %></textarea>
 			</div>
 			<div class="form-group">
 				<input class="form-control" type="number" name="experience" value="<%= currentUser.experience %>"
-					min="0" max="80" required>
+					min="0" max="80" placeholder="<%= __('common.experience_placeholder') %>" required>
 			</div>
 			<div class="form-group">
 				<input class="form-control" type="number" name="visitCharge" value="<%= currentUser.visitCharge %>"
-					min="0" max="1000" required>
+					min="0" max="1000" placeholder="<%= __('common.visit_charge_placeholder') %>" required>
 			</div>
 			<div class="form-group">
-				<button class="btn btn-lg btn-primary btn-block">Update My Profile!</button>
+				<button class="btn btn-lg btn-primary btn-block"><%= __('common.update_profile_button') %></button>
 			</div>
 		</form>
-		<a href="/services">Cancel</a>
+		<a href="/myservices"><%= __('common.cancel_button') %></a>
 	</div>
 </div>
 <% include ../partials/footer %>

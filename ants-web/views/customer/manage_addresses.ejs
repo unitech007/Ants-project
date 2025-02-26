@@ -1,0 +1,139 @@
+<% include ../partials/header %>
+<title><%= __('common.manage_addresses_title') %></title>
+<link rel="stylesheet" href="/stylesheets/manage_addresses.css">
+
+<% include ../partials/navbar %>
+
+<div class="container">
+    <header class="jumbotron">
+        <h1><%= __('common.manage_addresses_title') %></h1>
+    </header>
+    
+    <div class="addresses">
+        <!-- (+ Add a New Address) Button -->
+        <button id="add-address-btn" class="btn btn-primary">+ <%= __('common.add_new_address_btn') %></button>
+    
+        <!-- Add New Address Form (Hidden by Default) -->
+        <div id="new-address-form" class="hidden">
+            <h3><%= __('common.add_new_address_title') %></h3>
+            <form action="/customer/<%= customer._id %>/addresses" method="POST">
+                <input type="text" name="address" placeholder="<%= __('common.address_placeholder') %>" required />
+                <input type="text" name="area" placeholder="<%= __('common.area_placeholder') %>" required />
+                <input type="text" name="city" placeholder="<%= __('common.city_placeholder') %>" required />
+                <input type="text" name="state" placeholder="<%= __('common.state_placeholder') %>" required />
+                <input type="number" name="pincode" placeholder="<%= __('common.pincode_placeholder') %>" required />
+                <input type="text" name="mobile" placeholder="<%= __('common.mobile_placeholder') %>" required />
+                <select name="type" required>
+                    <option value="Home"><%= __('common.type_home') %></option>
+                    <option value="Office"><%= __('common.type_office') %></option>
+                </select>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success"><%= __('common.save_btn') %></button>
+                    <button type="button" id="cancel-btn" class="btn btn-secondary"><%= __('common.cancel_btn') %></button>
+                </div>
+            </form>
+        </div>
+    
+        <!-- Existing Addresses Section -->
+        <header class="jumbotron">
+            <h3><%= __('common.existing_addresses_title') %></h3>
+        </header>
+        <div class="addresses-container">
+            <% if (customer.addresses.length > 0) { %>
+                <% customer.addresses.forEach(function(address) { %>
+                    <div class="address-card">
+                        <div class="address-details">
+                            <h4>
+                                <%= address.name %> <span><%= address.mobile %></span>
+                            </h4>
+                            <p><%= address.address %></p>
+                            <p><%= address.area %>, <%= address.city %>, <%= address.state %> - <%= address.pincode %></p>
+                            <p><strong><%= __('common.type_label') %>:</strong> <%= address.type %></p>
+                            <% if (address.isDefault) { %>
+                                <p><strong><%= __('common.default_label') %>:</strong> <%= __('common.yes') %></p>
+                            <% } %>
+                        </div>
+
+                        <!-- Edit Address Inline Form -->
+                        <form action="/customer/<%= customer._id %>/addresses/<%= address._id %>?_method=PUT" method="POST" class="edit-address-form hidden">
+                            <input type="text" name="address" value="<%= address.address %>" placeholder="<%= __('common.address_placeholder') %>" required>
+                            <input type="text" name="area" value="<%= address.area %>" placeholder="<%= __('common.area_placeholder') %>" required>
+                            <input type="text" name="city" value="<%= address.city %>" placeholder="<%= __('common.city_placeholder') %>" required>
+                            <input type="text" name="state" value="<%= address.state %>" placeholder="<%= __('common.state_placeholder') %>" required>
+                            <input type="number" name="pincode" value="<%= address.pincode %>" placeholder="<%= __('common.pincode_placeholder') %>" required>
+                            <input type="text" name="mobile" value="<%= address.mobile %>" placeholder="<%= __('common.mobile_placeholder') %>" required>
+                            <select name="type" required>
+                                <option value="Home" <%= address.type === "Home" ? "selected" : "" %>><%= __('common.type_home') %></option>
+                                <option value="Office" <%= address.type === "Office" ? "selected" : "" %>><%= __('common.type_office') %></option>
+                            </select>
+                            <button type="submit" class="btn btn-primary"><%= __('common.save_changes_btn') %></button>
+                        </form>
+
+                        <!-- Three Dots Menu -->
+                        <div class="menu">
+                            <button class="menu-btn">...</button>
+                            <div class="menu-options hidden">
+                                <!-- Toggle Edit Form -->
+                                <button class="btn btn-primary edit-toggle"><%= __('common.edit_btn') %></button>
+
+                                <!-- Delete Address -->
+                                <form action="/customer/<%= customer._id %>/addresses/<%= address._id %>?_method=DELETE" method="POST">
+                                    <button class="btn btn-danger"><%= __('common.delete_btn') %></button>
+                                </form>
+
+                                <!-- Set as Default -->
+                                <% if (!address.isDefault) { %>
+                                    <form action="/customer/<%= customer._id %>/addresses/<%= address._id %>/default?_method=PUT" method="POST">
+                                        <button class="btn btn-success"><%= __('common.set_default_btn') %></button>
+                                    </form>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p><%= __('common.no_addresses_found') %></p>
+            <% } %>
+        </div>
+    </div>
+    
+    <!-- JavaScript for Dynamic Behavior -->
+    <script>
+        const addAddressBtn = document.getElementById('add-address-btn');
+        const newAddressForm = document.getElementById('new-address-form');
+        const cancelBtn = document.getElementById('cancel-btn');
+    
+        addAddressBtn.addEventListener('click', () => {
+            newAddressForm.classList.remove('hidden');
+            addAddressBtn.classList.add('hidden');
+        });
+    
+        cancelBtn.addEventListener('click', () => {
+            newAddressForm.classList.add('hidden');
+            addAddressBtn.classList.remove('hidden');
+        });
+    
+        document.querySelectorAll(".menu-btn").forEach((menuButton) => {
+            menuButton.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const menuOptions = e.target.nextElementSibling;
+                menuOptions.classList.toggle("active");
+            });
+        });
+
+        document.addEventListener("click", () => {
+            document.querySelectorAll(".menu-options").forEach((menu) => {
+                menu.classList.remove("active");
+            });
+        });
+
+        document.querySelectorAll(".edit-toggle").forEach((btn) => {
+            btn.addEventListener("click", function () {
+                const form = this.closest(".address-card").querySelector(".edit-address-form");
+                form.classList.toggle("hidden");
+            });
+        });
+    </script>
+</div>
+
+<% include ../partials/footer %>

@@ -1,7 +1,7 @@
  <% include ../partials/header %>
 
 <meta name="description" content="Ants: Vendors List: Pending and Approved Vendors">
-<title>Ants: Vendors Management</title>
+<title><%= __('common.admin_vendor_list_title') %></title>
 <link rel="stylesheet" href="/stylesheets/v_list.css" />
 <link rel="stylesheet" href="/stylesheets/image_style.css" />
 
@@ -10,7 +10,7 @@
 <div class="container vendors-list-container">
 
    <!-- Pending Vendors Section -->
-<h3 class="mt-4 mb-3 text-center">Pending Approval Vendors</h3>
+<h3 class="mt-4 mb-3 text-center"><%= __('common.admin_vendor_list_pendingvendors') %></h3>
 <% if (pendingVendors && pendingVendors.length > 0) { %>
     <div class="row">
         <% pendingVendors.forEach(function(vendor) { %>
@@ -20,16 +20,16 @@
                 </div>
                 <h2 class="vendor-fname"><%= vendor.fname %></h2>
                 <h5 class="vendor-lname"><%= vendor.lname %></h5>
-                <p><a href="/<%= vendor.service %>/<%= vendor.subservice %>/<%= vendor._id %>" class="btn btn-primary">More Info</a></p>
+                <p><a href="/<%= vendor.service %>/<%= vendor.subservice %>/<%= vendor._id %>" class="btn btn-primary"><%= __('common.admin_vendor_list_moreinfo') %></a></p>
             </div>
         <% }); %>
     </div>
 <% } else { %>
-    <p class="text-center">No vendors pending approval.</p>
+    <p class="text-center"><%= __('common.admin_vendor_list_pendingapproval') %></p>
 <% } %>
 
 <!-- Approved Vendors Section -->
-<h3 class="mt-4 mb-3 text-center">Approved Vendors</h3>
+<h3 class="mt-4 mb-3 text-center"><%= __('common.admin_vendor_list_approvedvendors') %></h3>
 <% if (approvedVendors && approvedVendors.length > 0) { %>
     <div class="row">
         <% approvedVendors.forEach(function(vendor) { %>
@@ -39,12 +39,12 @@
                 </div>
                 <h2 class="vendor-fname"><%= vendor.fname %></h2>
                 <h5 class="vendor-lname"><%= vendor.lname %></h5>
-                <p><a href="/<%= vendor.service %>/<%= vendor.subservice %>/<%= vendor._id %>" class="btn btn-primary">More Info</a></p>
+                <p><a href="/<%= vendor.service %>/<%= vendor.subservice %>/<%= vendor._id %>" class="btn btn-primary"><%= __('common.admin_vendor_list_approvedmoreinfo') %></a></p>
             </div>
         <% }); %>
     </div>
 <% } else { %>
-    <p class="text-center">No approved vendors found.</p>
+    <p class="text-center"><%= __('common.admin_vendor_list_noapprovedvendors') %></p>
 <% } %>
 
 

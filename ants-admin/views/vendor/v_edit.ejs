@@ -1,5 +1,5 @@
 <% include ../partials/header %>
-<title>Ants: Edit Vendor</title>
+<title><%= __('common.admin_vendor_title') %> </title>
 <link rel="stylesheet" href="/stylesheets/image_style.css" />
 <link rel="stylesheet" href="/stylesheets/form.css" />
 <% include ../partials/navbar %>
@@ -8,11 +8,11 @@
     <div class="vendor-image-div">
         <div class="vendor-image"><img src="<%= currentVendor.image %>" alt=""></div>
     </div>
-    <h1 class="text-center">Edit <strong><%= currentVendor.username %></strong></h1>
+    <h1 class="text-center"><%= __('common.admin_vendor_heading') %> <strong><%= currentVendor.username %></strong></h1>
     <div class="form-container">
         <form action="/vendor/<%= currentVendor._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="image">Change Image</label>
+                <label for="image"><%= __('common.admin_vendor_changeimage') %></label>
                 <input type="file" id="image" name="image" accept="image/*" autofocus>
             </div>
             <div class="form-group">
@@ -80,10 +80,10 @@
                     min="0" max="1000" required>
             </div>
             <div class="form-group">
-                <button class="btn btn-lg btn-primary btn-block">Update My Profile!</button>
+                <button class="btn btn-lg btn-primary btn-block"><%= __('common.admin_vendor_updateprofile') %></button>
             </div>
         </form>
-        <a href="/services">Cancel</a>
+        <a href="/services"><%= __('common.admin_vendor_cancel') %></a>
     </div>
 </div>
 <% include ../partials/footer %>

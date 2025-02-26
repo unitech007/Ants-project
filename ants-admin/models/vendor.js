@@ -5,17 +5,20 @@ var VendorSchema = new mongoose.Schema({
     // New simplified schema fields
     name: { 
         type: String, 
-        required: true 
+        required: true, 
+        default: "Unnamed Vendor"
     },
     
     rating: { 
         type: Number, 
-        required: true 
+        required: true,
+        default: 0 
     },
     
     price: { 
         type: Number, 
-        required: true 
+        required: true,
+        default: 0 
     },
     
     isApproved: {
@@ -89,15 +92,16 @@ var VendorSchema = new mongoose.Schema({
         required: true
     },
 
-    service: {
-        type: String,
-        required: true
-    },
-
-    subservice: {
-        type: String,
-        required: true
-    },
+    service: [{ 
+                type: mongoose.Schema.Types.ObjectId, 
+                ref: "Service",
+                 // Ensure every Worktype is tied to a Service
+            }],
+            subservice: [{ 
+                type: mongoose.Schema.Types.ObjectId, 
+                ref: "Subservice",
+                 // Ensure every Worktype is tied to a Subservice
+            }],
 
     experience: {
         type: Number,
@@ -113,6 +117,13 @@ var VendorSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+
+    worktypePrices: [
+            {
+                worktype: { type: mongoose.Schema.Types.ObjectId, ref: "Worktype" },
+                price: { type: Number }
+            }
+        ],
 
     comments: [
         {

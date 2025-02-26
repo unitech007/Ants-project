@@ -4,7 +4,7 @@ var middlewareObj = {};
 
 middlewareObj.checkCommentOwnership = function (req, res, next) {
     if (req.isAuthenticated()) {
-        Comment.findById(req.params.comment_id, function (err, foundComment) {
+        Comment.findById(req.params.comment_id,  (err, foundComment)=> {
             if (err || !foundComment) {
                 req.flash("error", "Sorry, that comment does not exist!");
                 res.redirect("/services");

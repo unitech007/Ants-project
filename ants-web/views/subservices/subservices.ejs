@@ -1,0 +1,49 @@
+<% include ../partials/header %>
+
+<meta name="description" content="<%= description %>">
+<link rel="stylesheet" href="/stylesheets/subservices.css" />
+<title><%= pageTitle %></title>
+
+<% include ../partials/navbar %>
+
+<div class="container">
+    <header class="jumbotron">
+        <div class="container">
+            <h1><%= pageTitle %></h1>
+            <div class="form-group" style="width: 240px">
+                <select class="form-control" id="categoryFilter" onchange="filterServices()">
+                    <option value="all"><%= __('common.all_services') %></option>
+                    <% subservices.forEach(subservice => { %>
+                        <option value="<%= subservice.keyname %>"><%= __('common.' + subservice.keyname) %></option>
+                    <% }) %>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <div class="row text-center sub-service-container" id="subServiceContainer">
+        <% subservices.forEach(subservice => { %>
+            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6 margin-bottom-16 sub-service-item" data-category="<%= subservice.keyname %>">
+                <div class="sub-service-content">
+                    <img class="sub-service-image" src="<%= subservice.images || '/path/to/placeholder.jpg' %>" alt="<%= subservice.name %>" />
+                    <p class="sub-service-name"><%= __('common.' + subservice.keyname) %></p>
+                </div>
+                <a href="/booking?serviceName=<%= __('common.' + service.keyname) %>&subServiceName=<%= __('common.' + subservice.keyname) %>&serviceId=<%= service._id %>&subServiceId=<%= subservice._id %>" class="btn btn-primary"><%= __('common.book_now') %></a>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<% include ../partials/footer %>
+
+<script>
+    function filterServices() {
+        const selectedCategory = document.getElementById('categoryFilter').value.toLowerCase();
+        const services = document.querySelectorAll('.sub-service-item');
+
+        services.forEach(service => {
+            const category = service.getAttribute('data-category').toLowerCase();
+            service.style.display = (selectedCategory === 'all' || category === selectedCategory) ? 'block' : 'none';
+        });
+    }
+</script>

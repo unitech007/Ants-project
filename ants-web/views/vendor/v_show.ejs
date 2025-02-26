@@ -1,5 +1,5 @@
 <% include ../partials/header %>
-<title>Ants: <%= vendor.fname %> <%= vendor.lname %></title>
+<title><%= __('common.vendor_title')%> <%= vendor.fname %> <%= vendor.lname %></title>
 <link rel="stylesheet" href="/stylesheets/v_show.css" />
 <link rel="stylesheet" href="/stylesheets/image_style.css" />
 <% include ../partials/navbar %>
@@ -15,18 +15,18 @@
 					<h1><%= vendor.fname %> <%= vendor.lname %></h1>
 				</div>
 				<div class="vendor-address-div">
-					<p class="vendor-address-label">ADDRESS</p>
+					<p class="vendor-address-label"><%= __('common.address_label') %></p>
 					<p class="vendor-address-content"><%= vendor.address %> <%= vendor.area %>, <%= vendor.city %>,
 						<%= vendor.state %> <%= vendor.pincode %></p>
 				</div>
 				<div class="vendor-email-div">
 					<p class="vendor-email-label"><a role="button" class="btn btn-sm btn-primary"
-							href="mailto:<%= vendor.email %>"><i class="fa fa-envelope"></i> Email</a></p>
+							href="mailto:<%= vendor.email %>"><i class="fa fa-envelope"></i> <%= __('common.email_button') %></a></p>
 					<p class="vendor-email-content"><%= vendor.email %></p>
 				</div>
 				<div class="vendor-mobile-div">
 					<p class="vendor-mobile-label"><a role="button" class="btn btn-sm btn-primary"
-							href="tel: +91<%= vendor.mobile %>"><i class="fa fa-phone"></i> Mobile</a></p>
+							href="tel: +91<%= vendor.mobile %>"><i class="fa fa-phone"></i> <%= __('common.mobile_button') %></a></p>
 					<p class="vendor-mobile-content">+91 <%= vendor.mobile %></p>
 				</div>
 			</div>
@@ -34,25 +34,25 @@
 		<div class="vendor-right-container col-xl-8 col-lg-6 col-md-6 col-sm-12 col-12">
 			<div class="container">
 				<div class="vendor-description-div">
-					<p class="vendor-description-label">SOMETHING ABOUT ME</p>
+					<p class="vendor-description-label"><%= __('common.about_me_label') %></p>
 					<p class="vendor-description-content"><%= vendor.description %></p>
 				</div>
 				<div class="row">
 					<div class="col-xl-6 col-lg-7 col-md-12 col-sm-12 col-12">
 						<div class="vendor-experience-div">
-							<p class="vendor-experience-label">EXPERIENCE IN THIS FIELD</p>
-							<p class="vendor-experience-content"><%= vendor.experience %> years</p>
+							<p class="vendor-experience-label"><%= __('common.experience_label') %></p>
+							<p class="vendor-experience-content"><%= vendor.experience %> <%= __('common.years_label') %></p>
 						</div>
 					</div>
 					<div class="col-xl-4 col-lg-3 col-md-12 col-sm-12 col-12">
 						<div class="vendor-visitcharge-div">
-							<p class="vendor-visitcharge-label">VISIT CHARGE</p>
+							<p class="vendor-visitcharge-label"><%= __('common.visit_charge_label') %></p>
 							<p class="vendor-visitcharge-content"><%= vendor.visitCharge %></p>
 						</div>
 					</div>
 					<div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 col-12">
 						<div class="vendor-rating-div">
-							<p class="vendor-rating-label">RATINGS</p>
+							<p class="vendor-rating-label"><%= __('common.ratings_label') %></p>
 							<p class="vendor-rating-content">4.8 / 5</p>
 						</div>
 					</div>
@@ -63,14 +63,13 @@
 	<div class="card card-body bg-light">
 		<div class="row">
 			<div class="col-12 col-sm-8 col-md-8">
-				<h2>Comments</h2>
+				<h2><%= __('common.comments_title') %></h2>
 			</div>
 			<div class="col-12 col-sm-4 col-md-4">
 				<div class="text-right">
 					<% if(currentUser && currentUser.isCustomer) {%>
 					<a class="btn btn-sm btn-success"
-						href="/<%= vendor.service %>/<%= vendor.subservice %>/<%= vendor._id %>/comments/new">Leave A
-						Review</a>
+						href="/<%= vendor.service %>/<%= vendor.subservice %>/<%= vendor._id %>/comments/new"><%= __('common.leave_review_button') %></a>
 					<% } %>
 				</div>
 			</div>
@@ -89,12 +88,12 @@
 				<% if(currentUser && currentUser.isCustomer && comment.author.id.equals(currentUser._id)){%>
 				<a class="btn btn-sm btn-warning float-left"
 					href="/<%= vendor.service %>/<%= vendor.subservice %>/<%= vendor._id %>/comments/<%= comment._id%>/edit">
-					Edit
+					<%= __('common.edit_button') %>
 				</a>
 				<form class="delete-form"
 					action="/<%= vendor.service %>/<%= vendor.subservice %>/<%= vendor._id %>/comments/<%= comment._id%>?_method=DELETE"
 					method="POST">
-					<button class="btn btn-sm btn-danger">Delete</button>
+					<button class="btn btn-sm btn-danger"><%= __('common.delete_button') %></button>
 				</form>
 				<% } %>
 			</div>

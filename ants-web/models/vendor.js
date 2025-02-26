@@ -1,34 +1,16 @@
-var mongoose = require("mongoose");
-var passportLocalMongooseVendor = require("passport-local-mongoose");
+const mongoose = require("mongoose");
+const passportLocalMongooseVendor = require("passport-local-mongoose");
 
 var VendorSchema = new mongoose.Schema({
-    // New simplified schema fields
-    /* username: { 
-        type: String, 
-        required: true 
-    },
-     
-     mobile: { 
-        type: Number, 
-        required: true 
-    },
-    
-    visitCharge: { 
-        type: Number, 
-        required: true 
-    }, */
- 
-
-    // Existing detailed schema fields
     isApproved: {
         type: Boolean,
         default: false,
-        required: true
+        required: true,
     },
 
     isCustomer: {
         type: Boolean,
-        required: true
+        required: true,
     },
 
     image: String,
@@ -36,105 +18,112 @@ var VendorSchema = new mongoose.Schema({
 
     fname: {
         type: String,
-        required: true
+        required: true,
     },
 
     lname: {
         type: String,
-        required: true
+        required: true,
     },
 
     username: {
         type: String,
         unique: true,
-        required: true
+        required: true,
     },
 
     email: {
         type: String,
         unique: true,
-        required: true
+        required: true,
     },
 
     password: {
-        type: String
+        type: String,
     },
 
     address: {
         type: String,
-        required: true
+        required: true,
     },
 
     area: {
         type: String,
-        required: true
+        required: true,
     },
 
     city: {
         type: String,
-        required: true
+        required: true,
     },
 
     state: {
         type: String,
-        required: true
+        required: true,
     },
 
     pincode: {
         type: Number,
-        required: true
+        required: true,
     },
 
     mobile: {
         type: Number,
-        required: true
+        required: true,
     },
 
-    service: {
-        type: String,
-        required: true
-    },
-
-    subservice: {
-        type: String,
-        required: true
-    },
+    service: [{ 
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: "Service",
+             // Ensure every Worktype is tied to a Service
+        }],
+        subservice: [{ 
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: "Subservice",
+             // Ensure every Worktype is tied to a Subservice
+        }],
 
     experience: {
         type: Number,
-        required: true
+        required: true,
     },
 
     visitCharge: {
         type: Number,
-        required: true
+        required: true,
     },
 
     description: {
         type: String,
-        required: true
+        required: true,
     },
-
+     
+    worktypePrices: [
+        {
+            worktype: { type: mongoose.Schema.Types.ObjectId, ref: "Worktype" },
+            price: { type: Number }
+        }
+    ],
+    
     comments: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Comment"
-        }
+            ref: "Comment",
+        },
     ],
 
     author: {
         id: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Customer"
+            ref: "Customer",
         },
         fname: String,
-        lname: String
+        lname: String,
     },
 
     resetPasswordToken: String,
-    resetPasswordExpires: Date
+    resetPasswordExpires: Date,
 });
-
 
 // Add passport-local-mongoose plugin for authentication
 VendorSchema.plugin(passportLocalMongooseVendor);
